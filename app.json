@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "Bookstore",
+    "slug": "bookstore-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0f0f"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "extra": {
+      "apiUrl": "https://bookstore-backend-n40b.onrender.com/api",
+      "stripePublishableKey": "pk_test_51SaDzyGsleA9N3wo1jerYOKdSRWx4GpBsHkwQH5it2qx1gJplkLEglshQ5c2lhdrIgYP4fpxvDbFbRhwWqbW0Lg500BOwyFtrn"
+    },
+    "ios": {
+      "supportsTabletMode": true,
+      "bundleIdentifier": "com.bookstore.app",
+      "buildNumber": "1"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f0f0f"
+      },
+      "package": "com.bookstore.app",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_NETWORK_STATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "bookstore",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 24,
+            "buildToolsVersion": "35.0.0"
+          }
+        }
+      ]
+    ]
+  }
+}
