@@ -1,11 +1,16 @@
-import { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
+import { createContext, useState, useContext, useEffect, type ReactNode, useCallback } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import type { User, Session } from '@supabase/supabase-js';
+import { createGuestUser } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
+  guestId: string | null;
   loading: boolean;
+  isGuest: boolean;
+  ensureGuest: () => Promise<string>;
   sendOTP: (email: string) => Promise<{ error?: string }>;
   verifyOTP: (email: string, token: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
@@ -16,6 +21,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [guestId, setGuestId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -37,6 +43,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const ensureGuestId = async () => {
+      if (user) {
+        setGuestId(null);
+        return;
+      }
+      try {
+        const existing = await AsyncStorage.getItem('guest_id');
+        const id = await createGuestUser(existing || undefined);
+        setGuestId(id);
+        await AsyncStorage.setItem('guest_id', id);
+      } catch (err) {
+        console.error('Failed to ensure guest user:', err);
+      }
+    };
+    ensureGuestId();
+  }, [user]);
+
+  const ensureGuest = useCallback(async () => {
+    if (user?.id) {
+      return user.id;
+    }
+    if (guestId) return guestId;
+    const id = await createGuestUser();
+    setGuestId(id);
+    await AsyncStorage.setItem('guest_id', id);
+    return id;
+  }, [guestId, user]);
 
   const sendOTP = async (email: string) => {
     try {
@@ -111,6 +146,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     await supabase.auth.signOut();
+    setGuestId(null);
+    await AsyncStorage.removeItem('guest_id');
   };
 
   return (
@@ -118,7 +155,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         session,
+        guestId,
         loading,
+        isGuest: !!(!user && guestId),
+        ensureGuest,
         sendOTP,
         verifyOTP,
         signOut,

@@ -1,8 +1,12 @@
 import { supabase } from './supabase';
 import Constants from "expo-constants";
+const isUuid = (val?: string) =>
+  !!val && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(val)
 
 // Get API URL from environment variable or use the IP address
-const API_BASE_URL = Constants.expoConfig?.extra?.apiUrl || process.env.EXPO_PUBLIC_API_URL || 'https://bookstore-backend-n40b.onrender.com/api';
+export const API_BASE_URL =
+  Constants.expoConfig?.extra?.apiUrl ||
+  process.env.EXPO_PUBLIC_API_URL;
 
 export interface Book {
   id: string;
@@ -11,6 +15,9 @@ export interface Book {
   author: string;
   date_uploaded: string;
   tags: string[];
+  views?: number;
+  summary?: string | null;
+  cover?: string | null;
 }
 
 export interface Chapter {
@@ -31,6 +38,21 @@ export async function fetchBooks(): Promise<Book[]> {
 
   if (error) {
     console.error('Error fetching books:', error);
+    throw error;
+  }
+
+  return data || [];
+}
+
+// Fetch books ordered by views (descending) for ranking
+export async function fetchBooksByViews(): Promise<Book[]> {
+  const { data, error } = await supabase
+    .from('books')
+    .select('*')
+    .order('views', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching books by views:', error);
     throw error;
   }
 
@@ -84,5 +106,38 @@ export async function fetchChapter(bookId: string, chapterNumber: number): Promi
   }
 
   return data;
+}
+
+// Fire-and-forget view logger
+export async function logBookView(bookId: string): Promise<void> {
+  try {
+    await fetch(`${API_BASE_URL}/books/${encodeURIComponent(bookId)}/view`, {
+      method: 'POST',
+    });
+  } catch (error) {
+    console.warn('Failed to log book view', error);
+  }
+}
+
+// Create or reuse a guest user record (no email) via backend only
+export async function createGuestUser(existingId?: string): Promise<string> {
+  const payload: Record<string, string> = {}
+  if (isUuid(existingId)) {
+    payload.guestId = existingId!
+  }
+
+  const resp = await fetch(`${API_BASE_URL}/auth/guest`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  if (!resp.ok) {
+    const text = await resp.text().catch(() => '')
+    throw new Error(`Guest creation failed: ${resp.status} ${resp.statusText} ${text}`)
+  }
+
+  const json = await resp.json()
+  return json.guestId || guestId
 }
 

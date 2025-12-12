@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from "react"
 import React from "react"
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
-import { fetchChapters, fetchChapter, type Chapter } from "../lib/api"
+import { fetchChapters, fetchChapter, logBookView, type Chapter } from "../lib/api"
+import TopUpModal from "../components/TopUpModal"
 
 const CHAPTER_COST = 50
+const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.bookstore.harba.app"
 
 export default function ReaderScreen() {
   const router = useRouter()
@@ -21,6 +23,7 @@ export default function ReaderScreen() {
   const { credits, unlockChapter, isChapterUnlocked, getLastReadChapter, updateReadingProgress, settings } = useLibrary()
   const { theme } = useTheme()
   const bookId = book?.id
+  const isWeb = Platform.OS === "web"
   
   const [currentChapter, setCurrentChapter] = useState(() => {
     if (chapterParam) return Number(chapterParam)
@@ -32,6 +35,8 @@ export default function ReaderScreen() {
   const [chapter, setChapter] = useState<Chapter | null>(null)
   const [totalChapters, setTotalChapters] = useState(30)
   const [isLoadingChapter, setIsLoadingChapter] = useState(true)
+  const [showTopUpModal, setShowTopUpModal] = useState(false)
+  const isWebBlocked = isWeb && currentChapter >= 2
 
   // Load chapter data from Supabase - only depend on bookId and currentChapter
   useEffect(() => {
@@ -46,6 +51,11 @@ export default function ReaderScreen() {
         const allChapters = await fetchChapters(bookId)
         if (!cancelled) {
           setTotalChapters(allChapters.length)
+
+          if (isWebBlocked) {
+            setChapter(null)
+            return
+          }
 
           // Then load the current chapter
           const chapterData = await fetchChapter(bookId, currentChapter)
@@ -70,7 +80,13 @@ export default function ReaderScreen() {
     return () => {
       cancelled = true
     }
-  }, [bookId, currentChapter])
+  }, [bookId, currentChapter, isWebBlocked])
+
+  // Log a view when the reader opens for a book
+  useEffect(() => {
+    if (!bookId) return
+    logBookView(bookId)
+  }, [bookId])
 
   // Update reading progress when chapter changes - use bookId instead of book
   useEffect(() => {
@@ -93,11 +109,17 @@ export default function ReaderScreen() {
     )
   }
 
-  const isLocked = bookId ? currentChapter >= 20 && !isChapterUnlocked(bookId, currentChapter) : false
+  const isLocked = !isWebBlocked && bookId ? currentChapter >= 20 && !isChapterUnlocked(bookId, currentChapter) : false
   const canGoNext = currentChapter < totalChapters
   const canGoPrev = currentChapter > 1
 
   const handleNextChapter = async () => {
+    if (isWeb) {
+      const nextChapter = Math.min(currentChapter + 1, totalChapters)
+      setCurrentChapter(nextChapter)
+      return
+    }
+
     if (!bookId) return
     const nextChapter = currentChapter + 1
 
@@ -115,6 +137,12 @@ export default function ReaderScreen() {
     if (canGoPrev) {
       setCurrentChapter(currentChapter - 1)
     }
+  }
+
+  const handleContinueOnApp = () => {
+    Linking.openURL(APP_DOWNLOAD_URL).catch(() => {
+      Alert.alert("Open the app", "Please download or open the mobile app to continue reading.")
+    })
   }
 
   const handleUnlockChapter = async () => {
@@ -135,6 +163,25 @@ export default function ReaderScreen() {
       return (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.primary} />
+        </View>
+      )
+    }
+
+    if (isWebBlocked) {
+      return (
+        <View style={styles.lockedContainer}>
+          <Ionicons name="phone-portrait-outline" size={64} color={theme.primary} />
+          <Text style={[styles.lockedTitle, { color: theme.text }]}>Continue on the App</Text>
+          <Text style={[styles.lockedText, { color: theme.textSecondary }]}>
+            Chapters 2 and above are available in the mobile app. Open the app to keep reading.
+          </Text>
+          <Pressable 
+            style={[styles.unlockButton, { backgroundColor: theme.primary }]} 
+            onPress={handleContinueOnApp}
+          >
+            <Ionicons name="open-outline" size={20} color="#fff" />
+            <Text style={styles.unlockButtonText}>Continue Reading on the App</Text>
+          </Pressable>
         </View>
       )
     }
@@ -190,7 +237,18 @@ export default function ReaderScreen() {
         <Pressable onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} color={theme.primary} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: theme.text }]}>{book.title}</Text>
+        <Pressable
+          style={{ flex: 1 }}
+          onPress={() => {
+            if (bookId) {
+              router.push({ pathname: "/book/[bookId]", params: { bookId } })
+            }
+          }}
+        >
+          <Text style={[styles.headerTitle, { color: theme.text }]} numberOfLines={1}>
+            {book.title}
+          </Text>
+        </Pressable>
         <View style={{ width: 28 }} />
       </View>
 
@@ -256,18 +314,26 @@ export default function ReaderScreen() {
                   styles.modalButton, 
                   styles.modalButtonConfirm, 
                   { backgroundColor: theme.primary },
-                  credits < CHAPTER_COST && styles.modalButtonDisabled
                 ]}
-                onPress={handleUnlockChapter}
-                disabled={credits < CHAPTER_COST}
+                onPress={() => {
+                  if (credits < CHAPTER_COST) {
+                    setShowPaywall(false)
+                    setShowTopUpModal(true)
+                  } else {
+                    handleUnlockChapter()
+                  }
+                }}
               >
                 <Ionicons name="star" size={18} color="#fff" />
-                <Text style={styles.modalButtonTextConfirm}>Unlock ({CHAPTER_COST} credits)</Text>
+                <Text style={styles.modalButtonTextConfirm}>
+                  {credits < CHAPTER_COST ? "Purchase credits" : `Unlock\n(${CHAPTER_COST} credits)`}
+                </Text>
               </Pressable>
             </View>
           </View>
         </View>
       </Modal>
+      <TopUpModal visible={showTopUpModal} onClose={() => setShowTopUpModal(false)} />
     </SafeAreaView>
   )
 }
@@ -412,9 +478,12 @@ const styles = StyleSheet.create({
     gap: 12,
     width: "100%",
   },
+  modalButtonCancel: {},
+  modalButtonConfirm: {},
   modalButton: {
     flex: 1,
     paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
@@ -430,8 +499,12 @@ const styles = StyleSheet.create({
   },
   modalButtonTextConfirm: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: "600",
+    flexShrink: 1,
+    textAlign: "center",
+    lineHeight: 16,
+    flexWrap: "wrap",
   },
   loadingContainer: {
     flex: 1,

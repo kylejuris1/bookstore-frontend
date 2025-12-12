@@ -25,6 +25,7 @@ export interface UserSettings {
   fontSize?: number // 14, 16, 18, 20, 22
   notifications?: boolean
   darkMode?: boolean
+  purchasedProducts?: string[]
 }
 
 interface LibraryContextType {
@@ -59,7 +60,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const [unlockedChapters, setUnlockedChapters] = useState<Record<string, Set<number>>>({})
   const [bookmarkedBooks, setBookmarkedBooks] = useState<string[]>([])
   const [readingProgress, setReadingProgress] = useState<Record<string, ReadingProgress>>({})
-  const [settings, setSettings] = useState<UserSettings>({ fontSize: 16, notifications: true, darkMode: true })
+  const [settings, setSettings] = useState<UserSettings>({ fontSize: 16, notifications: true, darkMode: false, purchasedProducts: [] })
   const [paidChapters, setPaidChapters] = useState<Array<{ bookId: string; chapterNum: number }>>([])
 
   // Load user data from Supabase when user is logged in
@@ -68,8 +69,21 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       if (!user) {
         // If no user, reset to defaults and load reading progress from local storage only
         setCredits(0)
-        setBookmarkedBooks([])
+        try {
+          const savedBookmarks = await AsyncStorage.getItem("bookmarks_local")
+          setBookmarkedBooks(savedBookmarks ? JSON.parse(savedBookmarks) : [])
+        } catch (err) {
+          console.error("Error loading local bookmarks:", err)
+          setBookmarkedBooks([])
+        }
         setUnlockedChapters({})
+        // Explicitly set default settings with light mode
+        setSettings({
+          fontSize: 16,
+          notifications: true,
+          darkMode: false, // Default to light mode
+          purchasedProducts: [],
+        })
         try {
           const savedProgress = await AsyncStorage.getItem("readingProgress")
           if (savedProgress) {
@@ -127,6 +141,13 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
               setCredits(0)
               setBookmarkedBooks([])
               setUnlockedChapters({})
+              // Explicitly set default settings with light mode
+              setSettings({
+                fontSize: 16,
+                notifications: true,
+                darkMode: false, // Default to light mode
+                purchasedProducts: [],
+              })
             }
           }
         } else if (userData) {
@@ -139,7 +160,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
           // Set data from Supabase
           setCredits(userData.number_of_credits || 0)
           
-          // Load settings
+          // Load settings - default to light mode
           if (userData.settings) {
             const userSettings = typeof userData.settings === 'string' 
               ? JSON.parse(userData.settings) 
@@ -147,7 +168,16 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
             setSettings({
               fontSize: userSettings.fontSize || 16,
               notifications: userSettings.notifications !== false,
-              darkMode: userSettings.darkMode !== false,
+              darkMode: userSettings.darkMode === true ? true : false, // Explicitly default to false (light mode)
+              purchasedProducts: Array.isArray(userSettings.purchasedProducts) ? userSettings.purchasedProducts : [],
+            })
+          } else {
+            // If no settings exist, explicitly set defaults with light mode
+            setSettings({
+              fontSize: 16,
+              notifications: true,
+              darkMode: false, // Default to light mode
+              purchasedProducts: [],
             })
           }
           
@@ -313,27 +343,23 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   }
 
   const toggleBookmark = async (bookId: string) => {
-    if (!user) {
-      return // User must be logged in to bookmark
-    }
-
     try {
       const updated = bookmarkedBooks.includes(bookId)
         ? bookmarkedBooks.filter((id) => id !== bookId)
         : [...bookmarkedBooks, bookId]
 
       setBookmarkedBooks(updated)
+      await AsyncStorage.setItem("bookmarks_local", JSON.stringify(updated))
 
-      // Update in Supabase
-      const { error } = await supabase
-        .from('users')
-        .update({ bookmarks: updated })
-        .eq('id', user.id)
+      if (user) {
+        const { error } = await supabase
+          .from('users')
+          .update({ bookmarks: updated })
+          .eq('id', user.id)
 
-      if (error) {
-        console.error("Error updating bookmarks in Supabase:", error)
-        // Revert local state if Supabase update fails
-        setBookmarkedBooks(bookmarkedBooks)
+        if (error) {
+          console.error("Error updating bookmarks in Supabase:", error)
+        }
       }
     } catch (error) {
       console.error("Error toggling bookmark:", error)

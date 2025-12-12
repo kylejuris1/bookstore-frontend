@@ -47,15 +47,15 @@ export default function TopUpModal({ visible, onClose }: TopUpModalProps) {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(15, 23, 42, 0.7)",
+    backgroundColor: "rgba(0,0,0,0.8)",
     justifyContent: "center",
-    paddingHorizontal: 16,
     alignItems: "center",
+    padding: 20,
   },
   modalContent: {
-    borderRadius: 16,
     width: "100%",
     maxWidth: 400,
+    borderRadius: 16,
     overflow: "hidden",
   },
   header: {

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView, Pressable, ScrollView, TextInput, Alert, Modal, Switch } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, Pressable, ScrollView, TextInput, Alert, Modal, Switch, Platform, Linking } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useAuth } from "../context/AuthContext"
 import { useLibrary } from "../context/LibraryContext"
@@ -6,6 +6,8 @@ import { useTheme } from "../context/ThemeContext"
 import { useState, useEffect } from "react"
 import { useRouter } from "expo-router"
 import { fetchBook } from "../lib/api"
+
+const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.bookstore.harba.app"
 
 export default function SettingsScreen() {
   const { user, sendOTP, verifyOTP, signOut, loading } = useAuth()
@@ -24,8 +26,13 @@ export default function SettingsScreen() {
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const [showAboutModal, setShowAboutModal] = useState(false)
   const [bookNames, setBookNames] = useState<Record<string, string>>({})
+  const isWeb = Platform.OS === "web"
 
   const handleSendOTP = async () => {
+    if (isWeb) {
+      Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
+      return
+    }
     if (!email) {
       Alert.alert("Error", "Please enter your email")
       return
@@ -44,6 +51,10 @@ export default function SettingsScreen() {
   }
 
   const handleVerifyOTP = async () => {
+    if (isWeb) {
+      Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
+      return
+    }
     if (!otp || otp.length !== 6) {
       Alert.alert("Error", "Please enter a valid 6-digit OTP code")
       return
@@ -138,22 +149,31 @@ export default function SettingsScreen() {
   return (
     <SafeAreaView style={[styles.container, dynamicStyles.container]}>
       <View style={styles.header}>
-        <Text style={styles.title}>Settings</Text>
+        <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
       </View>
 
       <ScrollView style={styles.content}>
         {!user ? (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.primary }]}>Account</Text>
-            <Pressable style={styles.loginButton} onPress={() => setShowLoginModal(true)}>
-              <Text style={styles.loginButtonText}>Log In</Text>
+            <Pressable
+              style={[styles.loginButton, { backgroundColor: theme.primary }]}
+              onPress={() => {
+                if (isWeb) {
+                  Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
+                  return
+                }
+                setShowLoginModal(true)
+              }}
+            >
+              <Text style={[styles.loginButtonText, { color: theme.primaryForeground || "#fff" }]}>Continue on the App</Text>
             </Pressable>
           </View>
         ) : (
         <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.primary }]}>Account</Text>
-            <View style={styles.userInfo}>
-              <Text style={styles.userEmail}>{user.email}</Text>
+            <View style={[styles.userInfo, { backgroundColor: theme.card }]}>
+              <Text style={[styles.userEmail, { color: theme.text }]}>{user.email}</Text>
             </View>
             <SettingItem icon="person-circle" label="Profile" onPress={() => setShowProfileModal(true)} theme={theme} />
             <SettingItem icon="bookmark" label="My Purchased Chapters" onPress={() => setShowPurchasedBooks(true)} theme={theme} />
@@ -211,21 +231,36 @@ export default function SettingsScreen() {
         onRequestClose={handleCloseModal}
       >
         <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Sign In</Text>
+          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
+              <Text style={[styles.modalTitle, { color: theme.primary }]}>Sign In</Text>
               <Pressable onPress={handleCloseModal}>
-                <Ionicons name="close" size={24} color="#9b7b6f" />
+                <Ionicons name="close" size={24} color={theme.textSecondary} />
               </Pressable>
             </View>
 
             <View style={styles.modalBody}>
-              {!otpSent ? (
+              {isWeb ? (
+                <View style={styles.webOnlyBlock}>
+                  <Ionicons name="phone-portrait-outline" size={48} color={theme.primary} />
+                  <Text style={[styles.loginHint, { color: theme.textSecondary, textAlign: "center" }]}>
+                    Sign in is available in the mobile app. Continue there to manage your account.
+                  </Text>
+                  <Pressable
+                    style={[styles.sendOTPButton, { backgroundColor: theme.primary }]}
+                    onPress={() => Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})}
+                  >
+                    <Text style={[styles.sendOTPButtonText, { color: theme.primaryForeground || "#fff" }]}>
+                      Continue on the App
+                    </Text>
+                  </Pressable>
+                </View>
+              ) : !otpSent ? (
                 <>
                   <TextInput
-                    style={styles.emailInput}
+                    style={[styles.emailInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
                     placeholder="Enter your email"
-                    placeholderTextColor="#9b7b6f"
+                    placeholderTextColor={theme.textSecondary}
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
@@ -234,27 +269,27 @@ export default function SettingsScreen() {
                     editable={!isLoading}
                   />
                   <Pressable
-                    style={[styles.sendOTPButton, isLoading && styles.sendOTPButtonDisabled]}
+                    style={[styles.sendOTPButton, { backgroundColor: theme.primary }, isLoading && styles.sendOTPButtonDisabled]}
                     onPress={handleSendOTP}
                     disabled={isLoading}
                   >
-                    <Text style={styles.sendOTPButtonText}>
+                    <Text style={[styles.sendOTPButtonText, { color: theme.primaryForeground || "#fff" }]}>
                       {isLoading ? "Sending..." : "Send OTP"}
                     </Text>
                   </Pressable>
-                  <Text style={styles.loginHint}>
+                  <Text style={[styles.loginHint, { color: theme.textSecondary }]}>
                     We'll send you a 6-digit code to sign in. No password needed!
                   </Text>
                 </>
               ) : (
                 <>
-                  <Text style={styles.otpSentText}>
+                  <Text style={[styles.otpSentText, { color: theme.text }]}>
                     Enter the 6-digit code sent to {email}
                   </Text>
                   <TextInput
-                    style={styles.otpInput}
+                    style={[styles.otpInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
                     placeholder="000000"
-                    placeholderTextColor="#9b7b6f"
+                    placeholderTextColor={theme.textSecondary}
                     value={otp}
                     onChangeText={(text) => setOtp(text.replace(/[^0-9]/g, '').slice(0, 6))}
                     keyboardType="number-pad"
@@ -263,11 +298,11 @@ export default function SettingsScreen() {
                     editable={!isLoading}
                   />
                   <Pressable
-                    style={[styles.verifyOTPButton, (isLoading || otp.length !== 6) && styles.verifyOTPButtonDisabled]}
+                    style={[styles.verifyOTPButton, { backgroundColor: theme.primary }, (isLoading || otp.length !== 6) && styles.verifyOTPButtonDisabled]}
                     onPress={handleVerifyOTP}
                     disabled={isLoading || otp.length !== 6}
                   >
-                    <Text style={styles.verifyOTPButtonText}>
+                    <Text style={[styles.verifyOTPButtonText, { color: theme.primaryForeground || "#fff" }]}>
                       {isLoading ? "Verifying..." : "Verify OTP"}
                     </Text>
                   </Pressable>
@@ -279,7 +314,7 @@ export default function SettingsScreen() {
                     }}
                     disabled={isLoading}
                   >
-                    <Text style={styles.resendButtonText}>Change email</Text>
+                    <Text style={[styles.resendButtonText, { color: theme.primary }]}>Change email</Text>
                   </Pressable>
                 </>
               )}
@@ -471,14 +506,14 @@ export default function SettingsScreen() {
             </View>
             <View style={styles.modalBody}>
               <View style={styles.aboutSection}>
-                <Text style={styles.aboutTitle}>Bookstore</Text>
+                <Text style={styles.aboutTitle}>Next Page</Text>
                 <Text style={styles.aboutVersion}>Version 1.0.0</Text>
               </View>
               <Text style={styles.aboutDescription}>
                 Your personal digital library for reading novels and stories. Discover new books, unlock chapters with credits, and enjoy reading anywhere.
               </Text>
               <View style={styles.aboutSection}>
-                <Text style={styles.aboutLabel}>© 2024 Bookstore App</Text>
+                <Text style={styles.aboutLabel}>© 2024 Next Page App</Text>
                 <Text style={styles.aboutLabel}>All rights reserved</Text>
               </View>
             </View>
@@ -678,6 +713,10 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: "center",
     lineHeight: 18,
+  },
+  webOnlyBlock: {
+    alignItems: "center",
+    gap: 12,
   },
   userInfo: {
     backgroundColor: "#1a1a1a",

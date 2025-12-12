@@ -1,29 +1,62 @@
-import { useState } from "react"
-import { View, Text, StyleSheet, FlatList, Pressable, SafeAreaView, ScrollView } from "react-native"
+import { useEffect, useMemo, useState } from "react"
+import { View, Text, StyleSheet, FlatList, Pressable, SafeAreaView, ScrollView, ActivityIndicator } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
-import { useLibrary, type Book } from "../context/LibraryContext"
+import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
 import BookCard from "../components/BookCard"
-import { MOCK_BOOKS } from "./HomeScreen"
 import { Image } from "react-native"
+import { fetchBooks, type Book } from "../lib/api"
 
 export default function LibraryScreen() {
   const router = useRouter()
   const { theme } = useTheme()
   const { bookmarkedBooks, readingProgress, getLastReadChapter } = useLibrary()
   const [activeTab, setActiveTab] = useState<"bookmarks" | "history">("bookmarks")
+  const [books, setBooks] = useState<Book[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    const load = async () => {
+      try {
+        setLoading(true)
+        const data = await fetchBooks()
+        if (!cancelled) setBooks(data)
+      } catch (err) {
+        console.error("Error loading books for library:", err)
+        if (!cancelled) setBooks([])
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const booksById = useMemo(() => {
+    const map: Record<string, Book> = {}
+    books.forEach((b) => {
+      map[b.book_id] = b
+    })
+    return map
+  }, [books])
 
   // Get bookmarked books
-  const bookmarkedBooksData = MOCK_BOOKS.filter((book) => bookmarkedBooks.includes(book.id))
+  const bookmarkedBooksData = bookmarkedBooks
+    .map((id) => booksById[id])
+    .filter((b): b is Book => !!b)
 
   // Get reading history (books with progress)
   const readingHistory = Object.values(readingProgress)
     .map((progress) => {
-      const book = MOCK_BOOKS.find((b) => b.id === progress.bookId)
-      return book ? { ...book, progress } : null
+      const book = booksById[progress.bookId]
+      if (!book) return null
+      return { book, progress }
     })
-    .filter((item): item is Book & { progress: { lastChapter: number; lastReadAt: number } } => item !== null)
+    .filter((item): item is { book: Book; progress: typeof readingProgress[keyof typeof readingProgress] } => !!item)
     .sort((a, b) => b.progress.lastReadAt - a.progress.lastReadAt)
 
   const formatDate = (timestamp: number) => {
@@ -39,26 +72,57 @@ export default function LibraryScreen() {
     return date.toLocaleDateString()
   }
 
-  const renderBookItem = (item: Book, showProgress = false) => (
-    <View style={styles.bookItem}>
-      <BookCard
-        book={item}
-        onReadPress={() => {
-          const lastChapter = getLastReadChapter(item.id)
-          router.push({
-            pathname: "/reader",
-            params: { book: JSON.stringify(item), chapter: String(lastChapter) },
-          })
-        }}
-      />
-      {showProgress && readingProgress[item.id] && (
-        <View style={styles.progressBadge}>
-          <Ionicons name="bookmark" size={12} color="#d4876f" />
-          <Text style={styles.progressText}>Chapter {readingProgress[item.id].lastChapter}</Text>
+  const toCardData = (item: Book) => {
+    const cover = (item as any).cover || (item as any).cover_url || (item as any).cover_image || null
+    return {
+      id: item.book_id,
+      title: item.book_name,
+      author: item.author,
+      cover,
+      summary: (item as any).summary || null,
+      tags: item.tags || [],
+      views: (item as any).views,
+    }
+  }
+
+  const renderBookItem = (item: Book, showProgress = false) => {
+    const card = toCardData(item)
+    const progress = readingProgress[card.id]
+    const lastChapter = progress?.lastChapter
+    return (
+      <View style={styles.bookItem}>
+        <BookCard
+          book={card}
+          onPress={() => {
+            if (progress && lastChapter) {
+              router.push({
+                pathname: "/reader",
+                params: { book: JSON.stringify(card), chapter: String(lastChapter) },
+              })
+            } else {
+              router.push({ pathname: "/book/[bookId]", params: { bookId: card.id } })
+            }
+          }}
+        />
+        {showProgress && progress && (
+          <View style={styles.progressBadge}>
+            <Ionicons name="bookmark" size={12} color="#d4876f" />
+            <Text style={styles.progressText}>Chapter {progress.lastChapter}</Text>
+          </View>
+        )}
+      </View>
+    )
+  }
+
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
         </View>
-      )}
-    </View>
-  )
+      </SafeAreaView>
+    )
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -128,9 +192,8 @@ export default function LibraryScreen() {
           <FlatList
             data={bookmarkedBooksData}
             renderItem={({ item }) => renderBookItem(item)}
-            keyExtractor={(item) => item.id}
-            numColumns={2}
-            columnWrapperStyle={styles.row}
+            keyExtractor={(item) => item.book_id}
+            numColumns={1}
             contentContainerStyle={styles.content}
           />
         )
@@ -142,20 +205,26 @@ export default function LibraryScreen() {
         </View>
       ) : (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          {readingHistory.map((item) => (
+          {readingHistory.map(({ book, progress }) => {
+            const coverUri =
+              (book as any).cover || (book as any).cover_url || (book as any).cover_image || null
+            const lastChapter = progress?.lastChapter
+            return (
             <Pressable
-              key={item.id}
+              key={book.book_id}
               style={[styles.historyItem, { backgroundColor: theme.card }]}
               onPress={() => {
-                const lastChapter = getLastReadChapter(item.id)
                 router.push({
                   pathname: "/reader",
-                  params: { book: JSON.stringify(item), chapter: String(lastChapter) },
+                  params: {
+                    book: JSON.stringify(toCardData(book)),
+                    ...(lastChapter ? { chapter: String(lastChapter) } : {}),
+                  },
                 })
               }}
             >
-              {item.cover ? (
-                <Image source={{ uri: item.cover }} style={styles.historyCover} />
+              {coverUri ? (
+                <Image source={{ uri: coverUri }} style={styles.historyCover} />
               ) : (
                 <View style={[styles.historyCover, styles.historyCoverPlaceholder, { backgroundColor: theme.muted }]}>
                   <Ionicons name="book" size={24} color={theme.textSecondary} />
@@ -163,20 +232,25 @@ export default function LibraryScreen() {
               )}
               <View style={styles.historyContent}>
                 <Text style={[styles.historyTitle, { color: theme.text }]} numberOfLines={1}>
-                  {item.title}
+                  {book.book_name}
                 </Text>
-                <Text style={[styles.historyAuthor, { color: theme.textSecondary }]}>{item.author}</Text>
+                <Text style={[styles.historyAuthor, { color: theme.textSecondary }]}>{book.author}</Text>
                 <View style={styles.historyFooter}>
                   <View style={styles.progressInfo}>
                     <Ionicons name="bookmark" size={14} color={theme.primary} />
-                    <Text style={[styles.progressInfoText, { color: theme.primary }]}>Chapter {item.progress.lastChapter}</Text>
+                    <Text style={[styles.progressInfoText, { color: theme.primary }]}>
+                      Chapter {progress.lastChapter}
+                    </Text>
                   </View>
-                  <Text style={[styles.historyDate, { color: theme.textSecondary }]}>{formatDate(item.progress.lastReadAt)}</Text>
+                  <Text style={[styles.historyDate, { color: theme.textSecondary }]}>
+                    {formatDate(progress.lastReadAt)}
+                  </Text>
                 </View>
               </View>
               <Ionicons name="chevron-forward" size={20} color={theme.textSecondary} />
             </Pressable>
-          ))}
+            )
+          })}
         </ScrollView>
       )}
     </SafeAreaView>
@@ -237,6 +311,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 32,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   emptyTitle: {
     fontSize: 20,

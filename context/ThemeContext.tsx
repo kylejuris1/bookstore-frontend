@@ -57,13 +57,13 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, settings, updateSettings }: ThemeProviderProps) {
-  // Default to dark mode if settings not provided
-  const isDarkMode = settings?.darkMode !== false
+  // Default to light mode if settings not provided
+  const isDarkMode = settings?.darkMode === true
   const [theme, setTheme] = useState<ThemeColors>(isDarkMode ? darkTheme : lightTheme)
   const [localDarkMode, setLocalDarkMode] = useState(isDarkMode)
 
   useEffect(() => {
-    const newIsDarkMode = settings?.darkMode !== false
+    const newIsDarkMode = settings?.darkMode === true
     setLocalDarkMode(newIsDarkMode)
     setTheme(newIsDarkMode ? darkTheme : lightTheme)
   }, [settings?.darkMode])
@@ -96,8 +96,8 @@ export function ThemeProvider({ children, settings, updateSettings }: ThemeProvi
 export function useTheme() {
   const context = useContext(ThemeContext)
   if (!context) {
-    // Return default dark theme if context is not available (fallback)
-    return { theme: darkTheme, isDarkMode: true, toggleTheme: async () => {} }
+    // Return default light theme if context is not available (fallback)
+    return { theme: lightTheme, isDarkMode: false, toggleTheme: async () => {} }
   }
   return context
 }

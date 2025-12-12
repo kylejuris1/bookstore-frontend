@@ -1,52 +1,5 @@
-# OSX
-.DS_Store
-
-# Xcode
-build/
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-xcuserdata
-*.xccheckout
-*.moved-aside
-DerivedData
-*.hmap
-*.ipa
-*.xcuserstate
-project.xcworkspace
-
-# Android/IntelliJ
-build/
-.idea
-.gradle
-local.properties
-*.iml
-*.hprof
-.cxx/
-*.keystore
-!debug.keystore
-
-# node.js
+# Dependencies
 node_modules/
-npm-debug.log
-yarn-error.log
-
-# fastlane
-**/fastlane/report.xml
-**/fastlane/Preview.html
-**/fastlane/screenshots
-**/fastlane/test_output
-
-# Bundle artifact
-*.jsbundle
-
-# CocoaPods
-/ios/Pods/
 
 # Expo
 .expo/
@@ -54,19 +7,39 @@ yarn-error.log
 dist/
 web-build/
 
+# Build artifacts
+android/build/
+android/app/build/
+android/.gradle/
+android/app/.cxx/
+android/app/debug.keystore
+*.apk
+*.aab
+*.keystore
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
 # Environment variables
 .env
 .env.local
 .env.*.local
 
 # Temporary files
-*.log
 *.tmp
 *.temp
-
-# EAS
-.eas/
-
-# TypeScript
-*.tsbuildinfo
 
