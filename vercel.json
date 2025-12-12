@@ -1,6 +1,5 @@
 {
-  "framework": "other",
-  "buildCommand": "npm install && npm run web:export",
+  "buildCommand": "npm run web:export",
   "outputDirectory": "dist"
 }
 
