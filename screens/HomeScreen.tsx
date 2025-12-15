@@ -14,7 +14,7 @@ import {
   Platform,
   Image,
   ImageBackground,
-  Dimensions,
+  useWindowDimensions,
 } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useSegments } from "expo-router"
@@ -34,6 +34,7 @@ export default function HomeScreen() {
   const { user } = useAuth()
   const { theme } = useTheme()
   const { readingProgress } = useLibrary()
+  const windowDimensions = useWindowDimensions()
   
   const currentRoute = segments[segments.length - 1] || "index"
   const [searchQuery, setSearchQuery] = useState("")
@@ -42,6 +43,46 @@ export default function HomeScreen() {
   const [isLoadingBooks, setIsLoadingBooks] = useState(true)
   const [showTopUpModal, setShowTopUpModal] = useState(false)
   const isWeb = Platform.OS === "web"
+  
+  // Calculate responsive padding based on window width
+  const horizontalPadding = useMemo(() => {
+    const width = windowDimensions.width
+    if (width < 640) return 16 // Mobile
+    if (width < 1024) return width * 0.1 // Tablet
+    return width * 0.2 // Desktop
+  }, [windowDimensions.width])
+  
+  const tagShowcasePadding = useMemo(() => {
+    const width = windowDimensions.width
+    if (width < 640) return 16 // Mobile
+    if (width < 1024) return width * 0.15 // Tablet
+    return width * 0.31 // Desktop
+  }, [windowDimensions.width])
+  
+  // Responsive number of columns for popular books
+  const numColumns = useMemo(() => {
+    const width = windowDimensions.width
+    if (width < 640) return 1 // Mobile: 1 column
+    if (width < 1024) return 2 // Tablet: 2 columns
+    return 3 // Desktop: 3 columns
+  }, [windowDimensions.width])
+  
+  // Responsive number of columns for tag showcase
+  const tagColumns = useMemo(() => {
+    const width = windowDimensions.width
+    if (width < 640) return 2 // Mobile: 2 columns
+    if (width < 1024) return 4 // Tablet: 4 columns
+    return 6 // Desktop: 6 columns
+  }, [windowDimensions.width])
+  
+  // Calculate fixed width for tag cards to ensure consistent sizing
+  const tagCardWidth = useMemo(() => {
+    const width = windowDimensions.width
+    const availableWidth = width - (tagShowcasePadding * 2)
+    const gap = 12 // columnGap from FlatList
+    const totalGaps = (tagColumns - 1) * gap
+    return (availableWidth - totalGaps) / tagColumns
+  }, [windowDimensions.width, tagShowcasePadding, tagColumns])
 
   useEffect(() => {
     const loadBooks = async () => {
@@ -121,8 +162,7 @@ export default function HomeScreen() {
     return getViewsValue(b) - getViewsValue(a)
   })
 
-  const numColumns = 3
-  const popularBooks = sortedBooks.slice(0, 6)
+  const popularBooks = sortedBooks.slice(0, numColumns * 2)
 
   const tagSections = useMemo(() => {
     const byTag = new Map<string, Book[]>()
@@ -156,8 +196,9 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
-        <Pressable onPress={() => router.push("/(tabs)")}>
+      <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
+        <Pressable onPress={() => router.push("/(tabs)")} style={styles.titleContainer}>
+          <Ionicons name="book" size={24} color={theme.primary} />
           <Text style={[styles.titleBase]}>
             <Text style={[styles.titleNext, { color: theme.text }]}>Next</Text>
             <Text style={[styles.titlePage, { color: theme.text }]}>Page</Text>
@@ -173,10 +214,12 @@ export default function HomeScreen() {
               size={20} 
               color={currentRoute === "index" ? theme.primary : theme.textSecondary} 
             />
-            <Text style={[
-              styles.navButtonText,
-              { color: currentRoute === "index" ? theme.primary : theme.textSecondary }
-            ]}>Discover</Text>
+            {windowDimensions.width >= 640 && (
+              <Text style={[
+                styles.navButtonText,
+                { color: currentRoute === "index" ? theme.primary : theme.textSecondary }
+              ]}>Discover</Text>
+            )}
           </Pressable>
           <Pressable
             style={styles.navButton}
@@ -187,10 +230,12 @@ export default function HomeScreen() {
               size={20} 
               color={currentRoute === "library" ? theme.primary : theme.textSecondary} 
             />
-            <Text style={[
-              styles.navButtonText,
-              { color: currentRoute === "library" ? theme.primary : theme.textSecondary }
-            ]}>Library</Text>
+            {windowDimensions.width >= 640 && (
+              <Text style={[
+                styles.navButtonText,
+                { color: currentRoute === "library" ? theme.primary : theme.textSecondary }
+              ]}>Library</Text>
+            )}
           </Pressable>
           <Pressable
             style={styles.navButton}
@@ -201,10 +246,12 @@ export default function HomeScreen() {
               size={20} 
               color={currentRoute === "rank" ? theme.primary : theme.textSecondary} 
             />
-            <Text style={[
-              styles.navButtonText,
-              { color: currentRoute === "rank" ? theme.primary : theme.textSecondary }
-            ]}>Rank</Text>
+            {windowDimensions.width >= 640 && (
+              <Text style={[
+                styles.navButtonText,
+                { color: currentRoute === "rank" ? theme.primary : theme.textSecondary }
+              ]}>Rank</Text>
+            )}
           </Pressable>
           <Pressable
             style={styles.navButton}
@@ -215,35 +262,41 @@ export default function HomeScreen() {
               size={20} 
               color={currentRoute === "profile" ? theme.primary : theme.textSecondary} 
             />
-            <Text style={[
-              styles.navButtonText,
-              { color: currentRoute === "profile" ? theme.primary : theme.textSecondary }
-            ]}>Profile</Text>
+            {windowDimensions.width >= 640 && (
+              <Text style={[
+                styles.navButtonText,
+                { color: currentRoute === "profile" ? theme.primary : theme.textSecondary }
+              ]}>Profile</Text>
+            )}
           </Pressable>
         </View>
         <View style={styles.headerRight}>
-          <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
-            <Ionicons name="search" size={18} color={theme.textSecondary} />
-            <TextInput
-              style={[styles.searchInput, { color: theme.text }]}
-              placeholder="Search..."
-              placeholderTextColor={theme.textSecondary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-          <Pressable 
-            style={[styles.topUpButton, { backgroundColor: theme.primary }]} 
-            onPress={() => {
-              if (isWeb) {
-                Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
-                return
-              }
-              setShowTopUpModal(true)
-            }}
-          >
-            <Text style={styles.topUpButtonText}>Continue Reading for FREE</Text>
-          </Pressable>
+          {windowDimensions.width >= 768 && (
+            <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
+              <Ionicons name="search" size={18} color={theme.textSecondary} />
+              <TextInput
+                style={[styles.searchInput, { color: theme.text }]}
+                placeholder="Search..."
+                placeholderTextColor={theme.textSecondary}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+          )}
+          {windowDimensions.width >= 1024 && (
+            <Pressable 
+              style={[styles.topUpButton, { backgroundColor: theme.primary }]} 
+              onPress={() => {
+                if (isWeb) {
+                  Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
+                  return
+                }
+                setShowTopUpModal(true)
+              }}
+            >
+              <Text style={styles.topUpButtonText}>Continue Reading for FREE</Text>
+            </Pressable>
+          )}
           <View style={[styles.creditsContainer, { backgroundColor: theme.card }]}>
             <Ionicons name="star" size={20} color={theme.primary} />
             <Text style={[styles.credits, { color: theme.primary }]}>{credits}</Text>
@@ -251,9 +304,9 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} style={styles.content}>
+      <ScrollView showsVerticalScrollIndicator={false} style={[styles.content, { paddingHorizontal: horizontalPadding }]}>
         {topSlides.length > 0 && (
-          <View style={[styles.heroShell, { borderColor: theme.border }]}>
+          <View style={[styles.heroShell, { borderColor: theme.border, marginHorizontal: -horizontalPadding }]}>
             <Pressable
               style={styles.heroPressable}
               onPress={() =>
@@ -298,6 +351,7 @@ export default function HomeScreen() {
 
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Popular</Text>
         <FlatList
+          key={`popular-${numColumns}`}
           data={popularBooks}
           renderItem={({ item }) => {
             // Convert Supabase book format to BookCard format
@@ -338,11 +392,11 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.book_id}
           scrollEnabled={false}
           numColumns={numColumns}
-          columnWrapperStyle={numColumns > 1 ? { columnGap: 16 } : undefined}
+          columnWrapperStyle={numColumns > 1 ? { columnGap: 16, justifyContent: "flex-start" } : undefined}
           contentContainerStyle={{ rowGap: 16, paddingBottom: 24 }}
         />
 
-        <View style={[styles.promoBanner, { backgroundColor: "#fce7f3" }]}>
+        <View style={[styles.promoBanner, { backgroundColor: "#fce7f3", marginHorizontal: -horizontalPadding }]}>
           <View style={styles.promoBannerContent}>
             <Text style={[styles.promoBannerTitle, { color: theme.text }]}>
               Explore and Read <Text style={styles.promoBannerTitleHighlight}>Stories for FREE</Text>
@@ -354,9 +408,9 @@ export default function HomeScreen() {
         </View>
 
         {tagSections.map((section) => {
-          // Pad to always have 6 items for consistent sizing
+          // Pad to always have tagColumns items for consistent sizing
           const paddedBooks = [...section.books]
-          while (paddedBooks.length < 6) {
+          while (paddedBooks.length < tagColumns) {
             paddedBooks.push(null as any)
           }
           return (
@@ -364,11 +418,12 @@ export default function HomeScreen() {
               <Text style={[styles.tagSectionTitle, { color: theme.text }]}>{section.tag}</Text>
               <View style={styles.tagShowcaseContainer}>
                 <FlatList
+                  key={`${section.tag}-${tagColumns}`}
                   data={paddedBooks}
                   renderItem={({ item }) => {
                     if (!item) {
                       return (
-                        <View style={styles.tagCardWrapper}>
+                        <View style={[styles.tagCardWrapper, { width: tagCardWidth }]}>
                           <View style={[styles.tagCardPlaceholder, { backgroundColor: theme.card }]}>
                             <View style={[styles.tagCardPlaceholderImage, { backgroundColor: theme.border }]} />
                             <View style={[styles.tagCardPlaceholderMeta, { backgroundColor: theme.card }]}>
@@ -386,7 +441,7 @@ export default function HomeScreen() {
                       (item as any).cover_image ||
                       DEFAULT_COVER
                       return (
-                        <View style={styles.tagCardWrapper}>
+                        <View style={[styles.tagCardWrapper, { width: tagCardWidth }]}>
                           <Pressable
                             style={[styles.tagCard, { backgroundColor: theme.card }]}
                             onPress={() => router.push({ pathname: "/book/[bookId]", params: { bookId: item.book_id } })}
@@ -409,8 +464,8 @@ export default function HomeScreen() {
                   }}
                   keyExtractor={(item, index) => item ? `${section.tag}-${item.book_id}` : `${section.tag}-placeholder-${index}`}
                   scrollEnabled={false}
-                  numColumns={6}
-                  columnWrapperStyle={{ columnGap: 12, justifyContent: "center" }}
+                  numColumns={tagColumns}
+                  columnWrapperStyle={tagColumns > 1 ? { columnGap: 12, justifyContent: "center" } : undefined}
                   contentContainerStyle={{ rowGap: 16, paddingBottom: 8 }}
                 />
               </View>
@@ -423,10 +478,6 @@ export default function HomeScreen() {
     </SafeAreaView>
   )
 }
-
-const screenWidth = Dimensions.get("window").width
-const horizontalPadding = screenWidth * 0.2 // 1/5 (20%) on each side
-const tagShowcasePadding = screenWidth * 0.31 // 31% on each side for tag showcase
 
 const styles = StyleSheet.create({
   container: {
@@ -442,7 +493,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
     flexWrap: "wrap",
     gap: 12,
@@ -453,6 +503,7 @@ const styles = StyleSheet.create({
     gap: 16,
     flex: 1,
     justifyContent: "center",
+    flexWrap: "wrap",
   },
   navButton: {
     flexDirection: "row",
@@ -464,6 +515,11 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: 12,
     fontWeight: "500",
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   titleBase: {
     fontSize: 28,
@@ -482,6 +538,8 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
+    gap: 8,
   },
   creditsContainer: {
     flexDirection: "row",
@@ -502,7 +560,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    marginRight: 8,
   },
   topUpButtonText: {
     color: "#fff",
@@ -511,7 +568,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: horizontalPadding,
   },
   searchContainer: {
     flexDirection: "row",
@@ -520,8 +576,9 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
-    marginRight: 8,
-    width: 200,
+    minWidth: 150,
+    maxWidth: 250,
+    flex: 1,
   },
   searchInput: {
     flex: 1,
@@ -548,7 +605,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 14,
     padding: 24,
-    marginHorizontal: -horizontalPadding,
   },
   promoBannerContent: {
     gap: 12,
@@ -570,7 +626,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   heroShell: {
-    marginHorizontal: -horizontalPadding,
     marginTop: 12,
     borderWidth: 1,
     borderRadius: 14,
@@ -628,12 +683,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   tagCardWrapper: {
-    width: 100,
+    // Width is set dynamically via inline style
   },
   tagCardPlaceholder: {
     borderRadius: 8,
     overflow: "hidden",
-    width: 100,
+    width: "100%",
   },
   tagCardPlaceholderImage: {
     width: "100%",
@@ -654,7 +709,7 @@ const styles = StyleSheet.create({
   tagCard: {
     borderRadius: 8,
     overflow: "hidden",
-    width: 100,
+    width: "100%",
   },
   tagCardImage: {
     width: "100%",

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import React from "react"
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, Dimensions } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, useWindowDimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
@@ -24,6 +24,14 @@ export default function ReaderScreen() {
   const { theme } = useTheme()
   const bookId = book?.id
   const isWeb = Platform.OS === "web"
+  const windowDimensions = useWindowDimensions()
+  
+  const horizontalPadding = useMemo(() => {
+    const width = windowDimensions.width
+    if (width < 640) return 16 // Mobile
+    if (width < 1024) return width * 0.1 // Tablet
+    return width * 0.2 // Desktop
+  }, [windowDimensions.width])
   
   const [currentChapter, setCurrentChapter] = useState(() => {
     if (chapterParam) return Number(chapterParam)
@@ -233,7 +241,7 @@ export default function ReaderScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={[styles.header, { borderBottomColor: theme.border }]}>
+      <View style={[styles.header, { borderBottomColor: theme.border, paddingHorizontal: horizontalPadding }]}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} color={theme.primary} />
         </Pressable>
@@ -252,11 +260,11 @@ export default function ReaderScreen() {
         <View style={{ width: 28 }} />
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.content, { paddingHorizontal: horizontalPadding }]} showsVerticalScrollIndicator={false}>
         {renderContent()}
       </ScrollView>
 
-      <View style={[styles.footer, { borderTopColor: theme.border }]}>
+      <View style={[styles.footer, { borderTopColor: theme.border, paddingHorizontal: horizontalPadding }]}>
         <Pressable
           style={[
             styles.navButton, 
@@ -338,9 +346,6 @@ export default function ReaderScreen() {
   )
 }
 
-const screenWidth = Dimensions.get("window").width
-const horizontalPadding = screenWidth * 0.2 // 20% on each side
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -349,7 +354,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
     borderBottomWidth: 1,
   },
@@ -361,7 +365,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: horizontalPadding,
     paddingVertical: 24,
   },
   chapterTitle: {
@@ -422,7 +425,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: horizontalPadding,
     paddingVertical: 16,
     borderTopWidth: 1,
     gap: 12,

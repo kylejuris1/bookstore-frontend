@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, ActivityIndicator, Pressable, Dimensions } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, ActivityIndicator, Pressable, useWindowDimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { fetchBook, fetchChapters, type Book } from "../lib/api"
@@ -22,6 +22,14 @@ export default function BookDetailsScreen() {
   const params = useLocalSearchParams()
   const bookId = useMemo(() => (params.bookId as string) || "", [params.bookId])
   const { readingProgress } = useLibrary()
+  const windowDimensions = useWindowDimensions()
+  
+  const horizontalPadding = useMemo(() => {
+    const width = windowDimensions.width
+    if (width < 640) return 16 // Mobile
+    if (width < 1024) return width * 0.1 // Tablet
+    return width * 0.2 // Desktop
+  }, [windowDimensions.width])
 
   const [book, setBook] = useState<Book | null>(null)
   const [chaptersCount, setChaptersCount] = useState<number>(0)
@@ -127,7 +135,7 @@ export default function BookDetailsScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <View style={[styles.hero, { backgroundColor: theme.card }]}>
+        <View style={[styles.hero, { backgroundColor: theme.card, paddingHorizontal: horizontalPadding }]}>
           <View style={styles.heroTop}>
             <Pressable onPress={() => router.back()} hitSlop={8}>
               <Ionicons name="arrow-back" size={24} color={theme.text} />
@@ -160,7 +168,7 @@ export default function BookDetailsScreen() {
           </View>
         </View>
 
-        <View style={[styles.statsCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+        <View style={[styles.statsCard, { backgroundColor: theme.card, borderColor: theme.border, marginHorizontal: horizontalPadding }]}>
           <View style={styles.statItem}>
             <Text style={[styles.statValue, { color: theme.text }]}>{formatViews(views)}</Text>
             <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Views</Text>
@@ -171,12 +179,12 @@ export default function BookDetailsScreen() {
           </View>
         </View>
 
-        <View style={styles.summarySection}>
+        <View style={[styles.summarySection, { marginHorizontal: horizontalPadding }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Summary</Text>
           <Text style={[styles.summary, { color: theme.textSecondary }]}>{summary}</Text>
         </View>
 
-        <View style={styles.tagsSection}>
+        <View style={[styles.tagsSection, { marginHorizontal: horizontalPadding }]}>
           <View style={styles.tagsHeader}>
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Tags</Text>
           </View>
@@ -189,7 +197,7 @@ export default function BookDetailsScreen() {
           </View>
         </View>
 
-        <View style={styles.chaptersHeader}>
+        <View style={[styles.chaptersHeader, { paddingHorizontal: horizontalPadding }]}>
           <Text style={[styles.sectionTitle, { color: theme.text }]}>Chapters</Text>
           <Text style={[styles.chaptersMeta, { color: theme.textSecondary }]}>
             {chaptersCount} chapters
@@ -197,15 +205,12 @@ export default function BookDetailsScreen() {
         </View>
       </ScrollView>
 
-      <Pressable style={[styles.readButton, { backgroundColor: theme.primary }]} onPress={handleRead}>
+      <Pressable style={[styles.readButton, { backgroundColor: theme.primary, left: horizontalPadding, right: horizontalPadding }]} onPress={handleRead}>
         <Text style={styles.readButtonText}>Read</Text>
       </Pressable>
     </SafeAreaView>
   )
 }
-
-const screenWidth = Dimensions.get("window").width
-const horizontalPadding = screenWidth * 0.2 // 20% on each side
 
 const styles = StyleSheet.create({
   container: {
@@ -215,7 +220,6 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   hero: {
-    paddingHorizontal: horizontalPadding,
     paddingTop: 12,
     paddingBottom: 16,
   },
@@ -271,7 +275,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   statsCard: {
-    marginHorizontal: horizontalPadding,
     marginTop: 12,
     padding: 16,
     borderRadius: 12,
@@ -294,7 +297,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   summarySection: {
-    marginHorizontal: horizontalPadding,
     marginTop: 16,
     gap: 8,
   },
@@ -307,7 +309,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   tagsSection: {
-    marginHorizontal: horizontalPadding,
     marginTop: 16,
   },
   tagsHeader: {
@@ -322,7 +323,6 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   chaptersHeader: {
-    marginHorizontal: horizontalPadding,
     marginTop: 16,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -334,8 +334,6 @@ const styles = StyleSheet.create({
   },
   readButton: {
     position: "absolute",
-    left: horizontalPadding,
-    right: horizontalPadding,
     bottom: 16,
     borderRadius: 14,
     paddingVertical: 14,
