@@ -130,16 +130,6 @@ export default function HomeScreen() {
     return a.book_name.localeCompare(b.book_name)
   })
 
-  if (libraryLoading || isLoadingBooks) {
-    return (
-      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.primary} />
-        </View>
-      </SafeAreaView>
-    )
-  }
-
   const numColumns = 3
   const popularBooks = sortedBooks.slice(0, 6)
 
@@ -162,6 +152,16 @@ export default function HomeScreen() {
       .slice(0, 5)
     return entries
   }, [books])
+
+  if (libraryLoading || isLoadingBooks) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+        </View>
+      </SafeAreaView>
+    )
+  }
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
