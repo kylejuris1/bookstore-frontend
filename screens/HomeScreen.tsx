@@ -12,7 +12,6 @@ import {
   Modal,
   Linking,
   Platform,
-  useWindowDimensions,
 } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
@@ -39,7 +38,6 @@ export default function HomeScreen() {
   const [showTopUpModal, setShowTopUpModal] = useState(false)
   const [sortOption, setSortOption] = useState<"title" | "author" | "views">("views")
   const isWeb = Platform.OS === "web"
-  const { width } = useWindowDimensions()
 
   useEffect(() => {
     const loadBooks = async () => {
@@ -97,7 +95,7 @@ export default function HomeScreen() {
     )
   }
 
-  const numColumns = width >= 1200 ? 3 : width >= 800 ? 2 : 1
+  const numColumns = 3
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -117,7 +115,7 @@ export default function HomeScreen() {
               setShowTopUpModal(true)
             }}
           >
-            <Text style={styles.topUpButtonText}>Continue Reading on the App</Text>
+            <Text style={styles.topUpButtonText}>Continue Reading for FREE</Text>
           </Pressable>
           <View style={[styles.creditsContainer, { backgroundColor: theme.card }]}>
             <Ionicons name="star" size={20} color={theme.primary} />
@@ -216,19 +214,19 @@ export default function HomeScreen() {
             const lastChapter = progress?.lastChapter
             return (
               <View style={{ flex: 1 }}>
-                <BookCard 
-                  book={bookCardData} 
-                  onPress={() => {
-                    if (hasProgress && lastChapter) {
-                      router.push({
-                        pathname: "/reader",
-                        params: { book: JSON.stringify(bookCardData), chapter: String(lastChapter) },
-                      })
-                    } else {
-                      router.push({ pathname: "/book/[bookId]", params: { bookId: item.book_id } })
-                    }
-                  }} 
-                />
+              <BookCard 
+                book={bookCardData} 
+                onPress={() => {
+                  if (hasProgress && lastChapter) {
+                    router.push({
+                      pathname: "/reader",
+                      params: { book: JSON.stringify(bookCardData), chapter: String(lastChapter) },
+                    })
+                  } else {
+                    router.push({ pathname: "/book/[bookId]", params: { bookId: item.book_id } })
+                  }
+                }} 
+              />
               </View>
             )
           }}

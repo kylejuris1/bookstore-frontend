@@ -1,5 +1,0 @@
-{
-  "buildCommand": "npm run web:export",
-  "outputDirectory": "dist"
-}
-

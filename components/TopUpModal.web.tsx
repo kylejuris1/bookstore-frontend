@@ -20,7 +20,7 @@ export default function TopUpModal({ visible, onClose }: TopUpModalProps) {
       <View style={styles.modalOverlay}>
         <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
           <View style={[styles.header, { borderBottomColor: theme.border }]}>
-            <Text style={[styles.title, { color: theme.text }]}>Continue on the App</Text>
+            <Text style={[styles.title, { color: theme.text }]}>Continue Reading for FREE</Text>
             <Pressable onPress={onClose} hitSlop={10}>
               <Ionicons name="close" size={22} color={theme.textSecondary} />
             </Pressable>
@@ -35,7 +35,7 @@ export default function TopUpModal({ visible, onClose }: TopUpModalProps) {
               style={[styles.ctaButton, { backgroundColor: theme.primary }]}
               onPress={() => Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})}
             >
-              <Text style={styles.ctaText}>Continue Reading on the App</Text>
+              <Text style={styles.ctaText}>Continue Reading for FREE</Text>
             </Pressable>
           </View>
         </View>

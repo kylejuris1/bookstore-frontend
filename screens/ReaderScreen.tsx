@@ -180,7 +180,7 @@ export default function ReaderScreen() {
             onPress={handleContinueOnApp}
           >
             <Ionicons name="open-outline" size={20} color="#fff" />
-            <Text style={styles.unlockButtonText}>Continue Reading on the App</Text>
+            <Text style={styles.unlockButtonText}>Continue Reading for FREE</Text>
           </Pressable>
         </View>
       )
