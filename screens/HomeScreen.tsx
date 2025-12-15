@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import {
   View,
   ScrollView,
@@ -12,6 +12,7 @@ import {
   Modal,
   Linking,
   Platform,
+  ImageBackground,
 } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
@@ -72,6 +73,50 @@ export default function HomeScreen() {
     return matchesSearch && matchesTag
   })
 
+  const topSlides = useMemo(() => {
+    const tagCounts = new Map<string, number>()
+    books.forEach((book) => {
+      (book.tags || []).forEach((tag) => {
+        tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1)
+      })
+    })
+
+    const topTags = [...tagCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([tag]) => tag)
+
+    return topTags
+      .map((tag) => {
+        const candidates = books
+          .filter((b) => (b.tags || []).includes(tag))
+          .sort((a, b) => getViewsValue(b) - getViewsValue(a))
+        const book = candidates[0]
+        if (!book) return null
+        const cover =
+          (book as any).cover ||
+          (book as any).cover_url ||
+          (book as any).cover_image ||
+          DEFAULT_COVER
+        return { tag, book, cover }
+      })
+      .filter(Boolean) as { tag: string; book: Book; cover: string }[]
+  }, [books])
+
+  const [slideIndex, setSlideIndex] = useState(0)
+
+  useEffect(() => {
+    if (!topSlides.length) return
+    if (slideIndex >= topSlides.length) {
+      setSlideIndex(0)
+      return
+    }
+    const id = setInterval(() => {
+      setSlideIndex((prev) => (prev + 1) % topSlides.length)
+    }, 5000)
+    return () => clearInterval(id)
+  }, [topSlides.length, slideIndex])
+
   const sortedBooks = [...filteredBooks].sort((a, b) => {
     if (sortOption === "views") {
       return getViewsValue(b) - getViewsValue(a)
@@ -123,6 +168,50 @@ export default function HomeScreen() {
           </View>
         </View>
       </View>
+
+      {topSlides.length > 0 && (
+        <View style={[styles.heroShell, { borderColor: theme.border }]}>
+          <Pressable
+            style={styles.heroPressable}
+            onPress={() =>
+              router.push({ pathname: "/book/[bookId]", params: { bookId: topSlides[slideIndex].book.book_id } })
+            }
+          >
+            <ImageBackground
+              source={{ uri: topSlides[slideIndex].cover }}
+              style={styles.heroImage}
+              imageStyle={styles.heroImageRadius}
+              resizeMode="cover"
+            >
+              <View style={styles.heroOverlay} />
+              <View style={styles.heroContent}>
+                <Text style={[styles.heroTag, { color: theme.primary }]}>Top in {topSlides[slideIndex].tag}</Text>
+                <Text style={[styles.heroTitle, { color: theme.text }]} numberOfLines={1}>
+                  {topSlides[slideIndex].book.book_name}
+                </Text>
+                <Text style={[styles.heroAuthor, { color: theme.textSecondary }]} numberOfLines={1}>
+                  by {topSlides[slideIndex].book.author}
+                </Text>
+              </View>
+            </ImageBackground>
+          </Pressable>
+          <View style={styles.heroDots}>
+            {topSlides.map((_, idx) => (
+              <Pressable
+                key={idx}
+                style={[
+                  styles.heroDot,
+                  {
+                    backgroundColor: idx === slideIndex ? theme.primary : theme.border,
+                    opacity: idx === slideIndex ? 1 : 0.6,
+                  },
+                ]}
+                onPress={() => setSlideIndex(idx)}
+              />
+            ))}
+          </View>
+        </View>
+      )}
 
       <ScrollView showsVerticalScrollIndicator={false} style={styles.content}>
         <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
@@ -374,6 +463,59 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginTop: 16,
     marginBottom: 12,
+  },
+  heroShell: {
+    marginHorizontal: 16,
+    marginTop: 12,
+    borderWidth: 1,
+    borderRadius: 14,
+    overflow: "hidden",
+  },
+  heroPressable: {
+    borderRadius: 14,
+    overflow: "hidden",
+  },
+  heroImage: {
+    height: 220,
+    width: "100%",
+    justifyContent: "flex-end",
+  },
+  heroImageRadius: {
+    borderRadius: 14,
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+  },
+  heroContent: {
+    padding: 16,
+    gap: 6,
+  },
+  heroTag: {
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+  },
+  heroTitle: {
+    fontSize: 20,
+    fontWeight: "800",
+  },
+  heroAuthor: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  heroDots: {
+    flexDirection: "row",
+    gap: 6,
+    padding: 10,
+    justifyContent: "center",
+    backgroundColor: "transparent",
+  },
+  heroDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 999,
   },
   authModalOverlay: {
     flex: 1,
