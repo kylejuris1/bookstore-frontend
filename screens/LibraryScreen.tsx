@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { View, Text, StyleSheet, FlatList, Pressable, SafeAreaView, ScrollView, ActivityIndicator } from "react-native"
+import { View, Text, StyleSheet, FlatList, Pressable, SafeAreaView, ScrollView, ActivityIndicator, Dimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
@@ -257,12 +257,15 @@ export default function LibraryScreen() {
   )
 }
 
+const screenWidth = Dimensions.get("window").width
+const horizontalPadding = screenWidth * 0.2 // 20% on each side
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
   },
   title: {
@@ -271,7 +274,7 @@ const styles = StyleSheet.create({
   },
   tabs: {
     flexDirection: "row",
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingVertical: 8,
     gap: 8,
   },
@@ -328,7 +331,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   content: {
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
   },
   row: {

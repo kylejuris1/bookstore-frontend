@@ -12,10 +12,12 @@ import {
   Modal,
   Linking,
   Platform,
+  Image,
   ImageBackground,
+  Dimensions,
 } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
-import { useRouter } from "expo-router"
+import { useRouter, useSegments } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
@@ -28,16 +30,17 @@ const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.book
 
 export default function HomeScreen() {
   const router = useRouter()
+  const segments = useSegments()
   const { user } = useAuth()
   const { theme } = useTheme()
   const { readingProgress } = useLibrary()
+  
+  const currentRoute = segments[segments.length - 1] || "index"
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedTag, setSelectedTag] = useState<string | null>(null)
   const { credits, isLoading: libraryLoading } = useLibrary()
   const [books, setBooks] = useState<Book[]>([])
   const [isLoadingBooks, setIsLoadingBooks] = useState(true)
   const [showTopUpModal, setShowTopUpModal] = useState(false)
-  const [sortOption, setSortOption] = useState<"title" | "author" | "views">("views")
   const isWeb = Platform.OS === "web"
 
   useEffect(() => {
@@ -57,8 +60,6 @@ export default function HomeScreen() {
     loadBooks()
   }, [])
 
-  const tags = ["All", "Romance", "Fantasy", "Contemporary", "Mystery", "Thriller"]
-
   const getViewsValue = (book?: Book) => {
     if (!book) return 0
     const v = (book as any).views
@@ -69,8 +70,7 @@ export default function HomeScreen() {
     const matchesSearch =
       book.book_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.author.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesTag = !selectedTag || selectedTag === "All" || (book.tags || []).includes(selectedTag)
-    return matchesSearch && matchesTag
+    return matchesSearch
   })
 
   const topSlides = useMemo(() => {
@@ -118,16 +118,7 @@ export default function HomeScreen() {
   }, [topSlides.length, slideIndex])
 
   const sortedBooks = [...filteredBooks].sort((a, b) => {
-    if (sortOption === "views") {
-      return getViewsValue(b) - getViewsValue(a)
-    }
-
-    if (sortOption === "author") {
-      return a.author.localeCompare(b.author)
-    }
-
-    // default: title
-    return a.book_name.localeCompare(b.book_name)
+    return getViewsValue(b) - getViewsValue(a)
   })
 
   const numColumns = 3
@@ -166,11 +157,81 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.header}>
-        <Text style={[styles.titleBase]}>
-          <Text style={[styles.titleNext, { color: theme.text }]}>Next</Text>
-          <Text style={[styles.titlePage, { color: theme.text }]}>Page</Text>
-        </Text>
+        <Pressable onPress={() => router.push("/(tabs)")}>
+          <Text style={[styles.titleBase]}>
+            <Text style={[styles.titleNext, { color: theme.text }]}>Next</Text>
+            <Text style={[styles.titlePage, { color: theme.text }]}>Page</Text>
+          </Text>
+        </Pressable>
+        <View style={styles.headerNav}>
+          <Pressable
+            style={styles.navButton}
+            onPress={() => router.push("/(tabs)")}
+          >
+            <Ionicons 
+              name="compass" 
+              size={20} 
+              color={currentRoute === "index" ? theme.primary : theme.textSecondary} 
+            />
+            <Text style={[
+              styles.navButtonText,
+              { color: currentRoute === "index" ? theme.primary : theme.textSecondary }
+            ]}>Discover</Text>
+          </Pressable>
+          <Pressable
+            style={styles.navButton}
+            onPress={() => router.push("/(tabs)/library")}
+          >
+            <Ionicons 
+              name="book" 
+              size={20} 
+              color={currentRoute === "library" ? theme.primary : theme.textSecondary} 
+            />
+            <Text style={[
+              styles.navButtonText,
+              { color: currentRoute === "library" ? theme.primary : theme.textSecondary }
+            ]}>Library</Text>
+          </Pressable>
+          <Pressable
+            style={styles.navButton}
+            onPress={() => router.push("/(tabs)/rank")}
+          >
+            <Ionicons 
+              name="trophy" 
+              size={20} 
+              color={currentRoute === "rank" ? theme.primary : theme.textSecondary} 
+            />
+            <Text style={[
+              styles.navButtonText,
+              { color: currentRoute === "rank" ? theme.primary : theme.textSecondary }
+            ]}>Rank</Text>
+          </Pressable>
+          <Pressable
+            style={styles.navButton}
+            onPress={() => router.push("/(tabs)/profile")}
+          >
+            <Ionicons 
+              name="person-circle" 
+              size={20} 
+              color={currentRoute === "profile" ? theme.primary : theme.textSecondary} 
+            />
+            <Text style={[
+              styles.navButtonText,
+              { color: currentRoute === "profile" ? theme.primary : theme.textSecondary }
+            ]}>Profile</Text>
+          </Pressable>
+        </View>
         <View style={styles.headerRight}>
+          <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
+            <Ionicons name="search" size={18} color={theme.textSecondary} />
+            <TextInput
+              style={[styles.searchInput, { color: theme.text }]}
+              placeholder="Search..."
+              placeholderTextColor={theme.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
           <Pressable 
             style={[styles.topUpButton, { backgroundColor: theme.primary }]} 
             onPress={() => {
@@ -190,116 +251,50 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {topSlides.length > 0 && (
-        <View style={[styles.heroShell, { borderColor: theme.border }]}>
-          <Pressable
-            style={styles.heroPressable}
-            onPress={() =>
-              router.push({ pathname: "/book/[bookId]", params: { bookId: topSlides[slideIndex].book.book_id } })
-            }
-          >
-            <ImageBackground
-              source={{ uri: topSlides[slideIndex].cover }}
-              style={styles.heroImage}
-              imageStyle={styles.heroImageRadius}
-              resizeMode="cover"
-            >
-              <View style={styles.heroOverlay} />
-              <View style={styles.heroContent}>
-                <Text style={[styles.heroTag, { color: theme.primary }]}>Top in {topSlides[slideIndex].tag}</Text>
-                <Text style={[styles.heroTitle, { color: theme.text }]} numberOfLines={1}>
-                  {topSlides[slideIndex].book.book_name}
-                </Text>
-                <Text style={[styles.heroAuthor, { color: theme.textSecondary }]} numberOfLines={1}>
-                  by {topSlides[slideIndex].book.author}
-                </Text>
-              </View>
-            </ImageBackground>
-          </Pressable>
-          <View style={styles.heroDots}>
-            {topSlides.map((_, idx) => (
-              <Pressable
-                key={idx}
-                style={[
-                  styles.heroDot,
-                  {
-                    backgroundColor: idx === slideIndex ? theme.primary : theme.border,
-                    opacity: idx === slideIndex ? 1 : 0.6,
-                  },
-                ]}
-                onPress={() => setSlideIndex(idx)}
-              />
-            ))}
-          </View>
-        </View>
-      )}
-
       <ScrollView showsVerticalScrollIndicator={false} style={styles.content}>
-        <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
-          <Ionicons name="search" size={20} color={theme.textSecondary} />
-          <TextInput
-            style={[styles.searchInput, { color: theme.text }]}
-            placeholder="Search by title or author..."
-            placeholderTextColor={theme.textSecondary}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-        </View>
-
-        <View style={styles.tagsContainer}>
-          <FlatList
-            horizontal
-            data={tags}
-            renderItem={({ item }) => (
-              <Pressable
-                style={[
-                  styles.tagButton, 
-                  { backgroundColor: theme.card },
-                  selectedTag === item && { backgroundColor: theme.primary }
-                ]}
-                onPress={() => setSelectedTag(item)}
+        {topSlides.length > 0 && (
+          <View style={[styles.heroShell, { borderColor: theme.border }]}>
+            <Pressable
+              style={styles.heroPressable}
+              onPress={() =>
+                router.push({ pathname: "/book/[bookId]", params: { bookId: topSlides[slideIndex].book.book_id } })
+              }
+            >
+              <ImageBackground
+                source={{ uri: topSlides[slideIndex].cover }}
+                style={styles.heroImage}
+                imageStyle={styles.heroImageRadius}
+                resizeMode="cover"
               >
-                <Text style={[
-                  styles.tagText, 
-                  { color: theme.textSecondary },
-                  selectedTag === item && { color: theme.primaryForeground }
-                ]}>{item}</Text>
-              </Pressable>
-            )}
-            keyExtractor={(item) => item}
-            showsHorizontalScrollIndicator={false}
-          />
-        </View>
-
-        <View style={styles.sortContainer}>
-          <Text style={[styles.sortLabel, { color: theme.textSecondary }]}>Sort by</Text>
-          <View style={styles.sortPills}>
-            {[
-              { key: "views", label: "Most viewed" },
-              { key: "title", label: "Title" },
-              { key: "author", label: "Author" },
-            ].map((option) => (
-              <Pressable
-                key={option.key}
-                style={[
-                  styles.sortPill,
-                  { borderColor: theme.border },
-                  sortOption === option.key && { backgroundColor: theme.primary },
-                ]}
-                onPress={() => setSortOption(option.key as any)}
-              >
-                <Text
+                <View style={styles.heroOverlay} />
+                <View style={styles.heroContent}>
+                  <Text style={[styles.heroTag, { color: theme.primary }]}>Top in {topSlides[slideIndex].tag}</Text>
+                  <Text style={styles.heroTitle} numberOfLines={1}>
+                    {topSlides[slideIndex].book.book_name}
+                  </Text>
+                  <Text style={styles.heroAuthor} numberOfLines={1}>
+                    by {topSlides[slideIndex].book.author}
+                  </Text>
+                </View>
+              </ImageBackground>
+            </Pressable>
+            <View style={styles.heroDots}>
+              {topSlides.map((_, idx) => (
+                <Pressable
+                  key={idx}
                   style={[
-                    styles.sortPillText,
-                    { color: sortOption === option.key ? theme.primaryForeground : theme.text },
+                    styles.heroDot,
+                    {
+                      backgroundColor: idx === slideIndex ? theme.primary : theme.border,
+                      opacity: idx === slideIndex ? 1 : 0.6,
+                    },
                   ]}
-                >
-                  {option.label}
-                </Text>
-              </Pressable>
-            ))}
+                  onPress={() => setSlideIndex(idx)}
+                />
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Popular</Text>
         <FlatList
@@ -347,55 +342,91 @@ export default function HomeScreen() {
           contentContainerStyle={{ rowGap: 16, paddingBottom: 24 }}
         />
 
-        {tagSections.map((section) => (
-          <View key={section.tag} style={{ marginTop: 24 }}>
-            <Text style={[styles.sectionTitle, { color: theme.text }]}>{section.tag}</Text>
-            <FlatList
-              data={section.books}
-              renderItem={({ item }) => {
-                const cover =
-                  (item as any).cover ||
-                  (item as any).cover_url ||
-                  (item as any).cover_image ||
-                  DEFAULT_COVER
-                return (
-                  <View style={{ flex: 1 }}>
-                    <Pressable
-                      style={styles.tagCard}
-                      onPress={() => router.push({ pathname: "/book/[bookId]", params: { bookId: item.book_id } })}
-                    >
-                      <ImageBackground
-                        source={{ uri: cover }}
-                        style={styles.tagCardImage}
-                        imageStyle={styles.tagCardImageRadius}
-                        resizeMode="cover"
-                      />
-                      <View style={styles.tagCardMeta}>
-                        <Text style={[styles.tagCardTitle, { color: theme.text }]} numberOfLines={2}>
-                          {item.book_name}
-                        </Text>
-                        <Text style={[styles.tagCardAuthor, { color: theme.textSecondary }]} numberOfLines={1}>
-                          {item.author}
-                        </Text>
-                      </View>
-                    </Pressable>
-                  </View>
-                )
-              }}
-              keyExtractor={(item) => `${section.tag}-${item.book_id}`}
-              scrollEnabled={false}
-              numColumns={3}
-              columnWrapperStyle={{ columnGap: 12 }}
-              contentContainerStyle={{ rowGap: 16, paddingBottom: 8 }}
-            />
+        <View style={[styles.promoBanner, { backgroundColor: "#fce7f3" }]}>
+          <View style={styles.promoBannerContent}>
+            <Text style={[styles.promoBannerTitle, { color: theme.text }]}>
+              Explore and Read <Text style={styles.promoBannerTitleHighlight}>Stories for FREE</Text>
+            </Text>
+            <Text style={[styles.promoBannerText, { color: theme.textSecondary }]}>
+              Free access to a vast number of stories on the NextPage app. Download the books you like and read anywhere & anytime.
+            </Text>
           </View>
-        ))}
+        </View>
+
+        {tagSections.map((section) => {
+          // Pad to always have 6 items for consistent sizing
+          const paddedBooks = [...section.books]
+          while (paddedBooks.length < 6) {
+            paddedBooks.push(null as any)
+          }
+          return (
+            <View key={section.tag} style={{ marginTop: 24, marginHorizontal: -horizontalPadding, paddingHorizontal: tagShowcasePadding }}>
+              <Text style={[styles.tagSectionTitle, { color: theme.text }]}>{section.tag}</Text>
+              <View style={styles.tagShowcaseContainer}>
+                <FlatList
+                  data={paddedBooks}
+                  renderItem={({ item }) => {
+                    if (!item) {
+                      return (
+                        <View style={styles.tagCardWrapper}>
+                          <View style={[styles.tagCardPlaceholder, { backgroundColor: theme.card }]}>
+                            <View style={[styles.tagCardPlaceholderImage, { backgroundColor: theme.border }]} />
+                            <View style={[styles.tagCardPlaceholderMeta, { backgroundColor: theme.card }]}>
+                              <View style={[styles.tagCardPlaceholderLine, { backgroundColor: theme.border }]} />
+                              <View style={[styles.tagCardPlaceholderLine, { width: "60%", backgroundColor: theme.border }]} />
+                              <View style={[styles.tagCardPlaceholderLine, { width: "40%", backgroundColor: theme.border }]} />
+                            </View>
+                          </View>
+                        </View>
+                      )
+                    }
+                    const cover =
+                      (item as any).cover ||
+                      (item as any).cover_url ||
+                      (item as any).cover_image ||
+                      DEFAULT_COVER
+                      return (
+                        <View style={styles.tagCardWrapper}>
+                          <Pressable
+                            style={[styles.tagCard, { backgroundColor: theme.card }]}
+                            onPress={() => router.push({ pathname: "/book/[bookId]", params: { bookId: item.book_id } })}
+                          >
+                          <Image source={{ uri: cover }} style={styles.tagCardImage} resizeMode="cover" />
+                          <View style={[styles.tagCardMeta, { backgroundColor: theme.card }]}>
+                            <Text style={[styles.tagCardTitle, { color: theme.text }]} numberOfLines={2}>
+                              {item.book_name}
+                            </Text>
+                            <Text style={[styles.tagCardAuthor, { color: theme.textSecondary }]} numberOfLines={1}>
+                              {item.author}
+                            </Text>
+                            <Text style={[styles.tagCardViews, { color: theme.textSecondary }]} numberOfLines={1}>
+                              {getViewsValue(item).toLocaleString()} views
+                            </Text>
+                          </View>
+                        </Pressable>
+                      </View>
+                    )
+                  }}
+                  keyExtractor={(item, index) => item ? `${section.tag}-${item.book_id}` : `${section.tag}-placeholder-${index}`}
+                  scrollEnabled={false}
+                  numColumns={6}
+                  columnWrapperStyle={{ columnGap: 12, justifyContent: "center" }}
+                  contentContainerStyle={{ rowGap: 16, paddingBottom: 8 }}
+                />
+              </View>
+            </View>
+          )
+        })}
       </ScrollView>
 
       {!isWeb && <TopUpModal visible={showTopUpModal} onClose={() => setShowTopUpModal(false)} />}
     </SafeAreaView>
   )
 }
+
+const screenWidth = Dimensions.get("window").width
+const horizontalPadding = screenWidth * 0.2 // 1/5 (20%) on each side
+const tagShowcasePadding = screenWidth * 0.31 // 31% on each side for tag showcase
 
 const styles = StyleSheet.create({
   container: {
@@ -411,8 +442,28 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
+    flexWrap: "wrap",
+    gap: 12,
+  },
+  headerNav: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    flex: 1,
+    justifyContent: "center",
+  },
+  navButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  navButtonText: {
+    fontSize: 12,
+    fontWeight: "500",
   },
   titleBase: {
     fontSize: 28,
@@ -448,79 +499,36 @@ const styles = StyleSheet.create({
   },
   topUpButton: {
     backgroundColor: "#d4876f",
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
     marginRight: 8,
   },
   topUpButtonText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "600",
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#1a1a1a",
     borderRadius: 10,
-    paddingHorizontal: 12,
-    marginVertical: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    marginRight: 8,
+    width: 200,
   },
   searchInput: {
     flex: 1,
     color: "#fff",
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    fontSize: 14,
-  },
-  tagsContainer: {
-    marginVertical: 12,
-  },
-  sortContainer: {
-    marginTop: 4,
-    marginBottom: 12,
-    gap: 8,
-  },
-  sortLabel: {
+    paddingVertical: 4,
+    paddingHorizontal: 6,
     fontSize: 13,
-    fontWeight: "500",
-  },
-  sortPills: {
-    flexDirection: "row",
-    gap: 8,
-    flexWrap: "wrap",
-  },
-  sortPill: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  sortPillText: {
-    fontSize: 13,
-    fontWeight: "600",
-  },
-  tagButton: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    marginRight: 8,
-    backgroundColor: "#1a1a1a",
-    borderRadius: 20,
-  },
-  tagButtonActive: {
-    backgroundColor: "#d4876f",
-  },
-  tagText: {
-    color: "#9b7b6f",
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  tagTextActive: {
-    color: "#fff",
   },
   sectionTitle: {
     fontSize: 20,
@@ -529,8 +537,40 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 12,
   },
+  tagSectionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  promoBanner: {
+    marginTop: 32,
+    marginBottom: 16,
+    borderRadius: 14,
+    padding: 24,
+    marginHorizontal: -horizontalPadding,
+  },
+  promoBannerContent: {
+    gap: 12,
+    alignItems: "center",
+  },
+  promoBannerTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    lineHeight: 32,
+    textAlign: "center",
+  },
+  promoBannerTitleHighlight: {
+    color: "#ec4899",
+    fontWeight: "800",
+  },
+  promoBannerText: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: "center",
+  },
   heroShell: {
-    marginHorizontal: 16,
+    marginHorizontal: -horizontalPadding,
     marginTop: 12,
     borderWidth: 1,
     borderRadius: 14,
@@ -565,10 +605,12 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 20,
     fontWeight: "800",
+    color: "#fff",
   },
   heroAuthor: {
     fontSize: 14,
     fontWeight: "600",
+    color: "#f3f4f6",
   },
   heroDots: {
     flexDirection: "row",
@@ -582,30 +624,59 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 999,
   },
-  tagCard: {
-    backgroundColor: "#1a1a1a",
-    borderRadius: 12,
+  tagShowcaseContainer: {
+    alignItems: "center",
+  },
+  tagCardWrapper: {
+    width: 100,
+  },
+  tagCardPlaceholder: {
+    borderRadius: 8,
     overflow: "hidden",
+    width: 100,
+  },
+  tagCardPlaceholderImage: {
+    width: "100%",
+    aspectRatio: 2 / 3,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
+  },
+  tagCardPlaceholderMeta: {
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    gap: 6,
+  },
+  tagCardPlaceholderLine: {
+    height: 10,
+    borderRadius: 4,
+    width: "80%",
+  },
+  tagCard: {
+    borderRadius: 8,
+    overflow: "hidden",
+    width: 100,
   },
   tagCardImage: {
-    height: 140,
     width: "100%",
-  },
-  tagCardImageRadius: {
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    aspectRatio: 2 / 3,
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   tagCardMeta: {
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    gap: 3,
   },
   tagCardTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "700",
   },
   tagCardAuthor: {
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: "500",
+  },
+  tagCardViews: {
+    fontSize: 11,
     fontWeight: "500",
   },
   authModalOverlay: {

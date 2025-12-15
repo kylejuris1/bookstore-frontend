@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { View, Text, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, Pressable } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, Pressable, Dimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { fetchBooksByViews, type Book } from "../lib/api"
@@ -110,6 +110,9 @@ export default function RankScreen() {
   )
 }
 
+const screenWidth = Dimensions.get("window").width
+const horizontalPadding = screenWidth * 0.2 // 20% on each side
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -123,7 +126,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
   },
   title: {
@@ -131,7 +134,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   list: {
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingBottom: 16,
   },
   empty: {

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, ActivityIndicator, Pressable } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, ActivityIndicator, Pressable, Dimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { fetchBook, fetchChapters, type Book } from "../lib/api"
@@ -204,6 +204,9 @@ export default function BookDetailsScreen() {
   )
 }
 
+const screenWidth = Dimensions.get("window").width
+const horizontalPadding = screenWidth * 0.2 // 20% on each side
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -212,7 +215,7 @@ const styles = StyleSheet.create({
     paddingBottom: 80,
   },
   hero: {
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingTop: 12,
     paddingBottom: 16,
   },
@@ -268,7 +271,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   statsCard: {
-    marginHorizontal: 16,
+    marginHorizontal: horizontalPadding,
     marginTop: 12,
     padding: 16,
     borderRadius: 12,
@@ -291,7 +294,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   summarySection: {
-    marginHorizontal: 16,
+    marginHorizontal: horizontalPadding,
     marginTop: 16,
     gap: 8,
   },
@@ -304,7 +307,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   tagsSection: {
-    marginHorizontal: 16,
+    marginHorizontal: horizontalPadding,
     marginTop: 16,
   },
   tagsHeader: {
@@ -319,7 +322,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   chaptersHeader: {
-    marginHorizontal: 16,
+    marginHorizontal: horizontalPadding,
     marginTop: 16,
     flexDirection: "row",
     justifyContent: "space-between",
@@ -331,8 +334,8 @@ const styles = StyleSheet.create({
   },
   readButton: {
     position: "absolute",
-    left: 16,
-    right: 16,
+    left: horizontalPadding,
+    right: horizontalPadding,
     bottom: 16,
     borderRadius: 14,
     paddingVertical: 14,

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import React from "react"
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, Dimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
@@ -338,6 +338,9 @@ export default function ReaderScreen() {
   )
 }
 
+const screenWidth = Dimensions.get("window").width
+const horizontalPadding = screenWidth * 0.2 // 20% on each side
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -346,7 +349,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
     borderBottomWidth: 1,
   },
@@ -358,7 +361,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingVertical: 24,
   },
   chapterTitle: {
@@ -419,7 +422,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingVertical: 16,
     borderTopWidth: 1,
     gap: 12,

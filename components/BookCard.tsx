@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 8,
     left: 8,
-    backgroundColor: "rgba(0,0,0,0.65)",
+    backgroundColor: "#ec4899",
     flexDirection: "row",
     alignItems: "center",
     gap: 6,

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView, Pressable, ScrollView, TextInput, Alert, Modal, Switch, Platform, Linking } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, Pressable, ScrollView, TextInput, Alert, Modal, Switch, Platform, Linking, Dimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useAuth } from "../context/AuthContext"
 import { useLibrary } from "../context/LibraryContext"
@@ -537,13 +537,16 @@ function SettingItem({ icon, label, onPress, value, theme }: { icon: string; lab
   )
 }
 
+const screenWidth = Dimensions.get("window").width
+const horizontalPadding = screenWidth * 0.2 // 20% on each side
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0f0f0f",
   },
   header: {
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
   },
   title: {
@@ -553,7 +556,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: horizontalPadding,
   },
   section: {
     marginTop: 24,
