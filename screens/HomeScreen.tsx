@@ -141,6 +141,27 @@ export default function HomeScreen() {
   }
 
   const numColumns = 3
+  const popularBooks = sortedBooks.slice(0, 6)
+
+  const tagSections = useMemo(() => {
+    const byTag = new Map<string, Book[]>()
+    books.forEach((book) => {
+      (book.tags || []).forEach((tag) => {
+        const arr = byTag.get(tag) || []
+        arr.push(book)
+        byTag.set(tag, arr)
+      })
+    })
+    const entries = [...byTag.entries()]
+      .map(([tag, list]) => ({
+        tag,
+        books: [...list].sort((a, b) => getViewsValue(b) - getViewsValue(a)).slice(0, 6),
+      }))
+      .filter((section) => section.books.length > 0)
+      .sort((a, b) => b.books.length - a.books.length)
+      .slice(0, 5)
+    return entries
+  }, [books])
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
@@ -280,9 +301,9 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Popular Now</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Popular</Text>
         <FlatList
-          data={sortedBooks}
+          data={popularBooks}
           renderItem={({ item }) => {
             // Convert Supabase book format to BookCard format
             const cover =
@@ -325,6 +346,50 @@ export default function HomeScreen() {
           columnWrapperStyle={numColumns > 1 ? { columnGap: 16 } : undefined}
           contentContainerStyle={{ rowGap: 16, paddingBottom: 24 }}
         />
+
+        {tagSections.map((section) => (
+          <View key={section.tag} style={{ marginTop: 24 }}>
+            <Text style={[styles.sectionTitle, { color: theme.text }]}>{section.tag}</Text>
+            <FlatList
+              data={section.books}
+              renderItem={({ item }) => {
+                const cover =
+                  (item as any).cover ||
+                  (item as any).cover_url ||
+                  (item as any).cover_image ||
+                  DEFAULT_COVER
+                return (
+                  <View style={{ flex: 1 }}>
+                    <Pressable
+                      style={styles.tagCard}
+                      onPress={() => router.push({ pathname: "/book/[bookId]", params: { bookId: item.book_id } })}
+                    >
+                      <ImageBackground
+                        source={{ uri: cover }}
+                        style={styles.tagCardImage}
+                        imageStyle={styles.tagCardImageRadius}
+                        resizeMode="cover"
+                      />
+                      <View style={styles.tagCardMeta}>
+                        <Text style={[styles.tagCardTitle, { color: theme.text }]} numberOfLines={2}>
+                          {item.book_name}
+                        </Text>
+                        <Text style={[styles.tagCardAuthor, { color: theme.textSecondary }]} numberOfLines={1}>
+                          {item.author}
+                        </Text>
+                      </View>
+                    </Pressable>
+                  </View>
+                )
+              }}
+              keyExtractor={(item) => `${section.tag}-${item.book_id}`}
+              scrollEnabled={false}
+              numColumns={3}
+              columnWrapperStyle={{ columnGap: 12 }}
+              contentContainerStyle={{ rowGap: 16, paddingBottom: 8 }}
+            />
+          </View>
+        ))}
       </ScrollView>
 
       {!isWeb && <TopUpModal visible={showTopUpModal} onClose={() => setShowTopUpModal(false)} />}
@@ -476,7 +541,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   heroImage: {
-    height: 220,
+    height: 280,
     width: "100%",
     justifyContent: "flex-end",
   },
@@ -516,6 +581,32 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 999,
+  },
+  tagCard: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 12,
+    overflow: "hidden",
+  },
+  tagCardImage: {
+    height: 140,
+    width: "100%",
+  },
+  tagCardImageRadius: {
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  tagCardMeta: {
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    gap: 4,
+  },
+  tagCardTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  tagCardAuthor: {
+    fontSize: 12,
+    fontWeight: "500",
   },
   authModalOverlay: {
     flex: 1,
