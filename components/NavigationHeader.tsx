@@ -34,7 +34,8 @@ export default function NavigationHeader() {
           <Text style={[styles.titlePage, { color: theme.text }]}>Page</Text>
         </Text>
       </Pressable>
-      <View style={styles.headerNav}>
+      <View style={styles.headerNavWrapper}>
+        <View style={styles.headerNav}>
         <Pressable
           style={styles.navButton}
           onPress={() => router.push("/(tabs)")}
@@ -99,11 +100,18 @@ export default function NavigationHeader() {
             ]}>Profile</Text>
           )}
         </Pressable>
+        </View>
       </View>
       <View style={styles.headerRight}>
-        {windowDimensions.width >= 768 && currentRoute === "index" && (
-          <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
-            <Ionicons name="search" size={18} color={theme.textSecondary} />
+        {windowDimensions.width >= 768 && (
+          <View style={[
+            styles.searchContainer, 
+            { backgroundColor: currentRoute === "index" ? theme.card : "transparent" },
+            currentRoute !== "index" && styles.searchContainerPlaceholder
+          ]}>
+            {currentRoute === "index" && (
+              <Ionicons name="search" size={18} color={theme.textSecondary} />
+            )}
           </View>
         )}
         {windowDimensions.width >= 1024 && (
@@ -158,12 +166,18 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 0.3,
   },
+  headerNavWrapper: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    pointerEvents: "box-none",
+  },
   headerNav: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    flex: 1,
-    justifyContent: "center",
     flexWrap: "wrap",
   },
   navButton: {
@@ -191,7 +205,11 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     minWidth: 150,
     maxWidth: 250,
-    flex: 1,
+    width: 200,
+  },
+  searchContainerPlaceholder: {
+    borderWidth: 0,
+    pointerEvents: "none",
   },
   topUpButton: {
     paddingHorizontal: 12,
