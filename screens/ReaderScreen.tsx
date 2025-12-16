@@ -7,6 +7,7 @@ import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
 import { fetchChapters, fetchChapter, logBookView, type Chapter } from "../lib/api"
 import TopUpModal from "../components/TopUpModal"
+import NavigationHeader from "../components/NavigationHeader"
 
 const CHAPTER_COST = 50
 const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.bookstore.harba.app"
@@ -29,8 +30,8 @@ export default function ReaderScreen() {
   const horizontalPadding = useMemo(() => {
     const width = windowDimensions.width
     if (width < 640) return 16 // Mobile
-    if (width < 1024) return width * 0.1 // Tablet
-    return width * 0.2 // Desktop
+    if (width < 1024) return width * 0.15 // Tablet
+    return width * 0.31 // Desktop - 31% spacing
   }, [windowDimensions.width])
   
   const [currentChapter, setCurrentChapter] = useState(() => {
@@ -241,6 +242,7 @@ export default function ReaderScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <NavigationHeader />
       <View style={[styles.header, { borderBottomColor: theme.border, paddingHorizontal: horizontalPadding }]}>
         <Pressable onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={28} color={theme.primary} />

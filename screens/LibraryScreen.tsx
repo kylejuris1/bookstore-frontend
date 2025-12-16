@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { View, Text, StyleSheet, FlatList, Pressable, SafeAreaView, ScrollView, ActivityIndicator, Dimensions } from "react-native"
+import { View, Text, StyleSheet, FlatList, Pressable, SafeAreaView, ScrollView, ActivityIndicator, useWindowDimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
@@ -7,6 +7,7 @@ import { useTheme } from "../context/ThemeContext"
 import BookCard from "../components/BookCard"
 import { Image } from "react-native"
 import { fetchBooks, type Book } from "../lib/api"
+import NavigationHeader from "../components/NavigationHeader"
 
 export default function LibraryScreen() {
   const router = useRouter()
@@ -15,6 +16,14 @@ export default function LibraryScreen() {
   const [activeTab, setActiveTab] = useState<"bookmarks" | "history">("bookmarks")
   const [books, setBooks] = useState<Book[]>([])
   const [loading, setLoading] = useState(true)
+  const windowDimensions = useWindowDimensions()
+  
+  const horizontalPadding = useMemo(() => {
+    const width = windowDimensions.width
+    if (width < 640) return 16 // Mobile
+    if (width < 1024) return width * 0.15 // Tablet
+    return width * 0.31 // Desktop - 31% spacing
+  }, [windowDimensions.width])
 
   useEffect(() => {
     let cancelled = false
@@ -126,11 +135,12 @@ export default function LibraryScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
+      <NavigationHeader />
+      <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
         <Text style={[styles.title, { color: theme.text }]}>Library</Text>
       </View>
 
-      <View style={styles.tabs}>
+      <View style={[styles.tabs, { paddingHorizontal: horizontalPadding }]}>
         <Pressable
           style={[
             styles.tab, 
@@ -194,7 +204,7 @@ export default function LibraryScreen() {
             renderItem={({ item }) => renderBookItem(item)}
             keyExtractor={(item) => item.book_id}
             numColumns={1}
-            contentContainerStyle={styles.content}
+            contentContainerStyle={[styles.content, { paddingHorizontal: horizontalPadding }]}
           />
         )
       ) : readingHistory.length === 0 ? (
@@ -204,7 +214,7 @@ export default function LibraryScreen() {
           <Text style={[styles.emptyText, { color: theme.textSecondary }]}>Start reading books to see your history here</Text>
         </View>
       ) : (
-        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+        <ScrollView style={[styles.content, { paddingHorizontal: horizontalPadding }]} showsVerticalScrollIndicator={false}>
           {readingHistory.map(({ book, progress }) => {
             const coverUri =
               (book as any).cover || (book as any).cover_url || (book as any).cover_image || null
@@ -257,15 +267,11 @@ export default function LibraryScreen() {
   )
 }
 
-const screenWidth = Dimensions.get("window").width
-const horizontalPadding = screenWidth * 0.2 // 20% on each side
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
   header: {
-    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
   },
   title: {
@@ -274,7 +280,6 @@ const styles = StyleSheet.create({
   },
   tabs: {
     flexDirection: "row",
-    paddingHorizontal: horizontalPadding,
     paddingVertical: 8,
     gap: 8,
   },
@@ -331,7 +336,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   content: {
-    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
   },
   row: {

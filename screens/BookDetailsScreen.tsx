@@ -134,6 +134,7 @@ export default function BookDetailsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <NavigationHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={[styles.hero, { backgroundColor: theme.card, paddingHorizontal: horizontalPadding }]}>
           <View style={styles.heroTop}>

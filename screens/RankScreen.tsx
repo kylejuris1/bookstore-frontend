@@ -1,11 +1,12 @@
-import { useEffect, useState } from "react"
-import { View, Text, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, Pressable, Dimensions } from "react-native"
+import { useEffect, useState, useMemo } from "react"
+import { View, Text, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, Pressable, useWindowDimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { fetchBooksByViews, type Book } from "../lib/api"
 import { useTheme } from "../context/ThemeContext"
 import BookCard from "../components/BookCard"
 import { useLibrary } from "../context/LibraryContext"
+import NavigationHeader from "../components/NavigationHeader"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
 
@@ -15,6 +16,14 @@ export default function RankScreen() {
   const { readingProgress } = useLibrary()
   const [books, setBooks] = useState<Book[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const windowDimensions = useWindowDimensions()
+  
+  const horizontalPadding = useMemo(() => {
+    const width = windowDimensions.width
+    if (width < 640) return 16 // Mobile
+    if (width < 1024) return width * 0.15 // Tablet
+    return width * 0.31 // Desktop - 31% spacing
+  }, [windowDimensions.width])
 
   useEffect(() => {
     let cancelled = false
@@ -54,17 +63,15 @@ export default function RankScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      <View style={styles.header}>
+      <NavigationHeader />
+      <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
         <Text style={[styles.title, { color: theme.text }]}>Rank</Text>
-        <Pressable onPress={() => router.back()}>
-          <Ionicons name="close" size={24} color={theme.textSecondary} />
-        </Pressable>
       </View>
 
       <FlatList
         data={books}
         keyExtractor={(item) => item.book_id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingHorizontal: horizontalPadding }]}
         renderItem={({ item, index }) => {
           const cover =
             (item as any).cover ||
@@ -110,9 +117,6 @@ export default function RankScreen() {
   )
 }
 
-const screenWidth = Dimensions.get("window").width
-const horizontalPadding = screenWidth * 0.2 // 20% on each side
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -126,7 +130,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
   },
   title: {
@@ -134,7 +137,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   list: {
-    paddingHorizontal: horizontalPadding,
     paddingBottom: 16,
   },
   empty: {

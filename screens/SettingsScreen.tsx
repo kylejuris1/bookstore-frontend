@@ -1,11 +1,12 @@
-import { View, Text, StyleSheet, SafeAreaView, Pressable, ScrollView, TextInput, Alert, Modal, Switch, Platform, Linking, Dimensions } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, Pressable, ScrollView, TextInput, Alert, Modal, Switch, Platform, Linking, useWindowDimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useAuth } from "../context/AuthContext"
 import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "expo-router"
 import { fetchBook } from "../lib/api"
+import NavigationHeader from "../components/NavigationHeader"
 
 const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.bookstore.harba.app"
 
@@ -14,6 +15,7 @@ export default function SettingsScreen() {
   const { settings, updateSettings, paidChapters } = useLibrary()
   const { theme, isDarkMode, toggleTheme } = useTheme()
   const router = useRouter()
+  const windowDimensions = useWindowDimensions()
   const [email, setEmail] = useState("")
   const [otp, setOtp] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -27,6 +29,13 @@ export default function SettingsScreen() {
   const [showAboutModal, setShowAboutModal] = useState(false)
   const [bookNames, setBookNames] = useState<Record<string, string>>({})
   const isWeb = Platform.OS === "web"
+  
+  const horizontalPadding = useMemo(() => {
+    const width = windowDimensions.width
+    if (width < 640) return 16 // Mobile
+    if (width < 1024) return width * 0.15 // Tablet
+    return width * 0.31 // Desktop - 31% spacing
+  }, [windowDimensions.width])
 
   const handleSendOTP = async () => {
     if (isWeb) {
@@ -92,10 +101,6 @@ export default function SettingsScreen() {
     Alert.alert("Success", `Font size set to ${size}pt`)
   }
 
-  const handleNotificationsToggle = async (value: boolean) => {
-    await updateSettings({ notifications: value })
-  }
-
   const handleDarkModeToggle = async (value: boolean) => {
     await updateSettings({ darkMode: value })
     // Theme will update automatically via ThemeContext
@@ -148,11 +153,12 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, dynamicStyles.container]}>
-      <View style={styles.header}>
+      <NavigationHeader />
+      <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
         <Text style={[styles.title, { color: theme.text }]}>Settings</Text>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView style={[styles.content, { paddingHorizontal: horizontalPadding }]}>
         {!user ? (
           <View style={styles.section}>
             <Text style={[styles.sectionTitle, { color: theme.primary }]}>Account</Text>
@@ -195,18 +201,6 @@ export default function SettingsScreen() {
             />
           </View>
           <SettingItem icon="text" label="Font Size" onPress={() => setShowFontSizeModal(true)} value={`${settings.fontSize || 16}pt`} theme={theme} />
-          <View style={[styles.settingItem, { borderBottomColor: theme.border }]}>
-            <View style={styles.settingLeft}>
-              <Ionicons name="notifications" size={24} color={theme.primary} />
-              <Text style={[styles.settingLabel, { color: theme.text }]}>Notifications</Text>
-            </View>
-            <Switch
-              value={settings.notifications !== false}
-              onValueChange={handleNotificationsToggle}
-              trackColor={{ false: theme.muted, true: theme.primary }}
-              thumbColor="#fff"
-            />
-          </View>
         </View>
 
         <View style={styles.section}>
@@ -537,16 +531,12 @@ function SettingItem({ icon, label, onPress, value, theme }: { icon: string; lab
   )
 }
 
-const screenWidth = Dimensions.get("window").width
-const horizontalPadding = screenWidth * 0.2 // 20% on each side
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#0f0f0f",
   },
   header: {
-    paddingHorizontal: horizontalPadding,
     paddingVertical: 12,
   },
   title: {
@@ -556,7 +546,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: horizontalPadding,
   },
   section: {
     marginTop: 24,
