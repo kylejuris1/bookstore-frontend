@@ -25,7 +25,6 @@ export default function SettingsScreen() {
   const [showPurchasedBooks, setShowPurchasedBooks] = useState(false)
   const [showFontSizeModal, setShowFontSizeModal] = useState(false)
   const [showHelpModal, setShowHelpModal] = useState(false)
-  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
   const [showAboutModal, setShowAboutModal] = useState(false)
   const [bookNames, setBookNames] = useState<Record<string, string>>({})
   const isWeb = Platform.OS === "web"
@@ -107,7 +106,7 @@ export default function SettingsScreen() {
   }
 
   const handlePrivacy = () => {
-    setShowPrivacyModal(true)
+    router.push("/privacy")
   }
 
   const handleAbout = () => {
@@ -453,40 +452,6 @@ export default function SettingsScreen() {
         </View>
       </Modal>
 
-      {/* Privacy Policy Modal */}
-      <Modal visible={showPrivacyModal} transparent animationType="fade" onRequestClose={() => setShowPrivacyModal(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { maxHeight: '80%' }]}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Privacy Policy</Text>
-              <Pressable onPress={() => setShowPrivacyModal(false)}>
-                <Ionicons name="close" size={24} color="#9b7b6f" />
-              </Pressable>
-            </View>
-            <ScrollView style={styles.modalBody}>
-              <Text style={styles.policyText}>
-                <Text style={styles.policyHeading}>Last Updated: {new Date().toLocaleDateString()}</Text>
-                {"\n\n"}
-                <Text style={styles.policyHeading}>1. Information We Collect</Text>
-                {"\n"}
-                We collect information you provide directly to us, including your email address, reading preferences, and payment information.
-                {"\n\n"}
-                <Text style={styles.policyHeading}>2. How We Use Your Information</Text>
-                {"\n"}
-                We use your information to provide, maintain, and improve our services, process payments, and communicate with you.
-                {"\n\n"}
-                <Text style={styles.policyHeading}>3. Data Security</Text>
-                {"\n"}
-                We implement appropriate security measures to protect your personal information. However, no method of transmission over the internet is 100% secure.
-                {"\n\n"}
-                <Text style={styles.policyHeading}>4. Your Rights</Text>
-                {"\n"}
-                You have the right to access, update, or delete your personal information at any time through the app settings.
-              </Text>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
 
       {/* About Modal */}
       <Modal visible={showAboutModal} transparent animationType="fade" onRequestClose={() => setShowAboutModal(false)}>
@@ -829,16 +794,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 14,
     lineHeight: 20,
-  },
-  policyText: {
-    color: "#fff",
-    fontSize: 14,
-    lineHeight: 22,
-  },
-  policyHeading: {
-    color: "#d4876f",
-    fontWeight: "600",
-    fontSize: 16,
   },
   aboutSection: {
     alignItems: "center",
