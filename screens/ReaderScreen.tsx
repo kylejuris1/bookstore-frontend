@@ -108,7 +108,7 @@ export default function ReaderScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Pressable onPress={() => router.back()}>
+          <Pressable onPress={() => router.push("/(tabs)")}>
             <Ionicons name="chevron-back" size={28} color="#d4876f" />
           </Pressable>
           <Text style={styles.headerTitle}>Book not found</Text>
@@ -244,7 +244,13 @@ export default function ReaderScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <NavigationHeader />
       <View style={[styles.header, { borderBottomColor: theme.border, paddingHorizontal: horizontalPadding }]}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => {
+          if (bookId) {
+            router.push({ pathname: "/book/[bookId]", params: { bookId } })
+          } else {
+            router.push("/(tabs)")
+          }
+        }}>
           <Ionicons name="chevron-back" size={28} color={theme.primary} />
         </Pressable>
         <Pressable
