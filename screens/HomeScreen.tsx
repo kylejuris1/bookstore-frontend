@@ -24,6 +24,7 @@ import { useTheme } from "../context/ThemeContext"
 import BookCard from "../components/BookCard"
 import { fetchBooks, type Book } from "../lib/api"
 import TopUpModal from "../components/TopUpModal"
+import Footer from "../components/Footer"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
 const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.bookstore.harba.app"
@@ -472,6 +473,11 @@ export default function HomeScreen() {
             </View>
           )
         })}
+
+        {/* Footer */}
+        <View style={{ marginHorizontal: -horizontalPadding }}>
+          <Footer />
+        </View>
       </ScrollView>
 
       {!isWeb && <TopUpModal visible={showTopUpModal} onClose={() => setShowTopUpModal(false)} />}
