@@ -215,10 +215,10 @@ export default function HomeScreen() {
               color={currentRoute === "index" ? theme.primary : theme.textSecondary} 
             />
             {windowDimensions.width >= 640 && (
-              <Text style={[
-                styles.navButtonText,
-                { color: currentRoute === "index" ? theme.primary : theme.textSecondary }
-              ]}>Discover</Text>
+            <Text style={[
+              styles.navButtonText,
+              { color: currentRoute === "index" ? theme.primary : theme.textSecondary }
+            ]}>Discover</Text>
             )}
           </Pressable>
           <Pressable
@@ -231,10 +231,10 @@ export default function HomeScreen() {
               color={currentRoute === "library" ? theme.primary : theme.textSecondary} 
             />
             {windowDimensions.width >= 640 && (
-              <Text style={[
-                styles.navButtonText,
-                { color: currentRoute === "library" ? theme.primary : theme.textSecondary }
-              ]}>Library</Text>
+            <Text style={[
+              styles.navButtonText,
+              { color: currentRoute === "library" ? theme.primary : theme.textSecondary }
+            ]}>Library</Text>
             )}
           </Pressable>
           <Pressable
@@ -247,10 +247,10 @@ export default function HomeScreen() {
               color={currentRoute === "rank" ? theme.primary : theme.textSecondary} 
             />
             {windowDimensions.width >= 640 && (
-              <Text style={[
-                styles.navButtonText,
-                { color: currentRoute === "rank" ? theme.primary : theme.textSecondary }
-              ]}>Rank</Text>
+            <Text style={[
+              styles.navButtonText,
+              { color: currentRoute === "rank" ? theme.primary : theme.textSecondary }
+            ]}>Rank</Text>
             )}
           </Pressable>
           <Pressable
@@ -263,39 +263,39 @@ export default function HomeScreen() {
               color={currentRoute === "profile" ? theme.primary : theme.textSecondary} 
             />
             {windowDimensions.width >= 640 && (
-              <Text style={[
-                styles.navButtonText,
-                { color: currentRoute === "profile" ? theme.primary : theme.textSecondary }
-              ]}>Profile</Text>
+            <Text style={[
+              styles.navButtonText,
+              { color: currentRoute === "profile" ? theme.primary : theme.textSecondary }
+            ]}>Profile</Text>
             )}
           </Pressable>
         </View>
         <View style={styles.headerRight}>
           {windowDimensions.width >= 768 && (
-            <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
-              <Ionicons name="search" size={18} color={theme.textSecondary} />
-              <TextInput
-                style={[styles.searchInput, { color: theme.text }]}
-                placeholder="Search..."
-                placeholderTextColor={theme.textSecondary}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-            </View>
+          <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
+            <Ionicons name="search" size={18} color={theme.textSecondary} />
+            <TextInput
+              style={[styles.searchInput, { color: theme.text }]}
+              placeholder="Search..."
+              placeholderTextColor={theme.textSecondary}
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+          </View>
           )}
           {windowDimensions.width >= 1024 && (
-            <Pressable 
-              style={[styles.topUpButton, { backgroundColor: theme.primary }]} 
-              onPress={() => {
-                if (isWeb) {
-                  Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
-                  return
-                }
-                setShowTopUpModal(true)
-              }}
-            >
-              <Text style={styles.topUpButtonText}>Continue Reading for FREE</Text>
-            </Pressable>
+          <Pressable 
+            style={[styles.topUpButton, { backgroundColor: theme.primary }]} 
+            onPress={() => {
+              if (isWeb) {
+                Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
+                return
+              }
+              setShowTopUpModal(true)
+            }}
+          >
+            <Text style={styles.topUpButtonText}>Continue Reading for FREE</Text>
+          </Pressable>
           )}
           <View style={[styles.creditsContainer, { backgroundColor: theme.card }]}>
             <Ionicons name="star" size={20} color={theme.primary} />

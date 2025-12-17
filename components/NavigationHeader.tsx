@@ -151,6 +151,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+    zIndex: 0,
   },
   titleBase: {
     fontSize: 28,
@@ -170,15 +171,19 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
+    top: 0,
+    bottom: 0,
     alignItems: "center",
     justifyContent: "center",
     pointerEvents: "box-none",
+    zIndex: 1,
   },
   headerNav: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
     flexWrap: "wrap",
+    pointerEvents: "auto",
   },
   navButton: {
     flexDirection: "row",
@@ -186,6 +191,7 @@ const styles = StyleSheet.create({
     gap: 4,
     paddingVertical: 4,
     paddingHorizontal: 8,
+    zIndex: 2,
   },
   navButtonText: {
     fontSize: 12,
@@ -196,6 +202,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     flexWrap: "wrap",
     gap: 8,
+    zIndex: 0,
   },
   searchContainer: {
     flexDirection: "row",

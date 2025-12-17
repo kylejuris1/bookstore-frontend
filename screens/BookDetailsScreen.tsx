@@ -5,6 +5,7 @@ import { useRouter, useLocalSearchParams } from "expo-router"
 import { fetchBook, fetchChapters, type Book } from "../lib/api"
 import { useTheme } from "../context/ThemeContext"
 import { useLibrary } from "../context/LibraryContext"
+import NavigationHeader from "../components/NavigationHeader"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
 
