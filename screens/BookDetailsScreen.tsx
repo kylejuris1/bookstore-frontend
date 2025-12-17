@@ -28,8 +28,8 @@ export default function BookDetailsScreen() {
   const horizontalPadding = useMemo(() => {
     const width = windowDimensions.width
     if (width < 640) return 16 // Mobile
-    if (width < 1024) return width * 0.1 // Tablet
-    return width * 0.2 // Desktop
+    if (width < 1024) return width * 0.15 // Tablet
+    return width * 0.31 // Desktop - 31% spacing
   }, [windowDimensions.width])
 
   const [book, setBook] = useState<Book | null>(null)
