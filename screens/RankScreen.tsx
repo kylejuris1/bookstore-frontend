@@ -71,7 +71,7 @@ export default function RankScreen() {
       <FlatList
         data={books}
         keyExtractor={(item) => item.book_id}
-        contentContainerStyle={[styles.list, { paddingHorizontal: horizontalPadding, rowGap: 16 }]}
+        contentContainerStyle={[styles.list, { paddingHorizontal: horizontalPadding }]}
         renderItem={({ item, index }) => {
           const cover =
             (item as any).cover ||
