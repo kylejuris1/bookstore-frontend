@@ -204,7 +204,7 @@ export default function LibraryScreen() {
             renderItem={({ item }) => renderBookItem(item)}
             keyExtractor={(item) => item.book_id}
             numColumns={1}
-            contentContainerStyle={[styles.content, { paddingHorizontal: horizontalPadding }]}
+            contentContainerStyle={[styles.content, { paddingHorizontal: horizontalPadding, rowGap: 16 }]}
           />
         )
       ) : readingHistory.length === 0 ? (

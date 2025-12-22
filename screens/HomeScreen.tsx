@@ -393,8 +393,8 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.book_id}
           scrollEnabled={false}
           numColumns={numColumns}
-          columnWrapperStyle={numColumns > 1 ? { columnGap: 16, justifyContent: "flex-start" } : undefined}
-          contentContainerStyle={{ rowGap: 16, paddingBottom: 24 }}
+            columnWrapperStyle={numColumns > 1 ? { columnGap: 16, justifyContent: "flex-start" } : undefined}
+            contentContainerStyle={{ rowGap: 16, paddingBottom: 24, paddingTop: 0 }}
         />
 
         <View style={[styles.promoBanner, { backgroundColor: "#fce7f3", marginHorizontal: -horizontalPadding }]}>
