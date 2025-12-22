@@ -67,6 +67,15 @@ export default function HomeScreen() {
     if (width < 1024) return 2 // Tablet: 2 columns
     return 3 // Desktop: 3 columns
   }, [windowDimensions.width])
+
+  // Calculate max width for popular book cards to prevent supersizing
+  const popularBookCardMaxWidth = useMemo(() => {
+    const width = windowDimensions.width
+    const availableWidth = width - (horizontalPadding * 2)
+    const gap = 16
+    const totalGaps = (numColumns - 1) * gap
+    return (availableWidth - totalGaps) / numColumns
+  }, [windowDimensions.width, horizontalPadding, numColumns])
   
   // Responsive number of columns for tag showcase
   const tagColumns = useMemo(() => {
@@ -373,7 +382,7 @@ export default function HomeScreen() {
             const hasProgress = !!progress
             const lastChapter = progress?.lastChapter
             return (
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, maxWidth: popularBookCardMaxWidth }}>
               <BookCard 
                 book={bookCardData} 
                 onPress={() => {
@@ -393,8 +402,8 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.book_id}
           scrollEnabled={false}
           numColumns={numColumns}
-            columnWrapperStyle={numColumns > 1 ? { columnGap: 16, justifyContent: "flex-start" } : undefined}
-            contentContainerStyle={{ rowGap: 16, paddingBottom: 24, paddingTop: 0 }}
+          columnWrapperStyle={numColumns > 1 ? { columnGap: 16, justifyContent: "flex-start" } : undefined}
+          contentContainerStyle={{ rowGap: 16, paddingBottom: 24 }}
         />
 
         <View style={[styles.promoBanner, { backgroundColor: "#fce7f3", marginHorizontal: -horizontalPadding }]}>
