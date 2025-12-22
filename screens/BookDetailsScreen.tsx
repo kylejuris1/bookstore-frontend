@@ -22,7 +22,7 @@ export default function BookDetailsScreen() {
   const router = useRouter()
   const params = useLocalSearchParams()
   const bookId = useMemo(() => (params.bookId as string) || "", [params.bookId])
-  const { readingProgress } = useLibrary()
+  const { readingProgress, isBookmarked, toggleBookmark } = useLibrary()
   const windowDimensions = useWindowDimensions()
   
   const horizontalPadding = useMemo(() => {
@@ -151,7 +151,13 @@ export default function BookDetailsScreen() {
             </Pressable>
             <View style={styles.heroActions}>
               <Ionicons name="share-social-outline" size={22} color={theme.text} />
-              <Ionicons name="bookmark-outline" size={22} color={theme.text} />
+              <Pressable onPress={() => book && toggleBookmark(book.book_id)} hitSlop={8}>
+                <Ionicons 
+                  name={book && isBookmarked(book.book_id) ? "bookmark" : "bookmark-outline"} 
+                  size={22} 
+                  color={book && isBookmarked(book.book_id) ? theme.primary : theme.text} 
+                />
+              </Pressable>
             </View>
           </View>
           <View style={styles.heroContent}>
@@ -244,12 +250,13 @@ const styles = StyleSheet.create({
   },
   heroContent: {
     flexDirection: "row",
-    gap: 16,
+    gap: 20,
+    alignItems: "flex-start",
   },
   cover: {
-    width: 110,
-    height: 155,
-    borderRadius: 10,
+    width: 180,
+    height: 270,
+    borderRadius: 12,
   },
   meta: {
     flex: 1,
