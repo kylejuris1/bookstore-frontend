@@ -108,18 +108,44 @@ export async function fetchChapter(bookId: string, chapterNumber: number): Promi
   return data;
 }
 
-// Fire-and-forget view logger
+// Fire-and-forget view logger - works on both web and mobile
 export async function logBookView(bookId: string): Promise<void> {
   try {
     if (!API_BASE_URL) {
-      console.warn('API_BASE_URL not configured, skipping view log');
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('API_BASE_URL not configured, skipping view log');
+      }
       return;
     }
-    await fetch(`${API_BASE_URL}/books/${encodeURIComponent(bookId)}/view`, {
+
+    if (!bookId) {
+      return;
+    }
+
+    // Ensure URL doesn't have trailing slash
+    const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    const url = `${baseUrl}/books/${encodeURIComponent(bookId)}/view`;
+    
+    // Fire-and-forget: don't wait for response, just send it
+    // This ensures view logging doesn't block the UI
+    fetch(url, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Keepalive ensures request completes even if page unloads (web only)
+      ...(typeof navigator !== 'undefined' && { keepalive: true }),
+    }).catch((error) => {
+      // Silently fail - we don't want to interrupt user experience
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to log book view:', error);
+      }
     });
   } catch (error) {
-    console.warn('Failed to log book view', error);
+    // Silently fail - we don't want to interrupt user experience
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('Error in logBookView:', error);
+    }
   }
 }
 
