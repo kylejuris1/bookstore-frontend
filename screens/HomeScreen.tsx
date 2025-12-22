@@ -178,10 +178,10 @@ export default function HomeScreen() {
       .map(([tag, list]) => ({
         tag,
         books: [...list].sort((a, b) => getViewsValue(b) - getViewsValue(a)).slice(0, 6),
+        totalCount: list.length,
       }))
       .filter((section) => section.books.length > 0)
       .sort((a, b) => b.books.length - a.books.length)
-      .slice(0, 5)
     return entries
   }, [books])
 
@@ -416,7 +416,16 @@ export default function HomeScreen() {
           }
           return (
             <View key={section.tag} style={{ marginTop: 24, marginHorizontal: -horizontalPadding, paddingHorizontal: tagShowcasePadding }}>
-              <Text style={[styles.tagSectionTitle, { color: theme.text }]}>{section.tag}</Text>
+              <View style={styles.tagSectionHeader}>
+                <Text style={[styles.tagSectionTitle, { color: theme.text }]}>{section.tag}</Text>
+                <Pressable
+                  onPress={() => router.push({ pathname: "/tag/[tagName]", params: { tagName: encodeURIComponent(section.tag) } })}
+                  style={styles.moreButton}
+                >
+                  <Text style={[styles.moreButtonText, { color: theme.primary }]}>More</Text>
+                  <Ionicons name="chevron-forward" size={16} color={theme.primary} />
+                </Pressable>
+              </View>
               <View style={styles.tagShowcaseContainer}>
                 <FlatList
                   key={`${section.tag}-${tagColumns}`}
@@ -594,17 +603,33 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: "700",
     color: "#fff",
     marginTop: 16,
     marginBottom: 12,
   },
+  tagSectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
   tagSectionTitle: {
-    fontSize: 20,
+    fontSize: 28,
     fontWeight: "700",
     color: "#fff",
-    marginBottom: 4,
+  },
+  moreButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  moreButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   promoBanner: {
     marginTop: 32,
