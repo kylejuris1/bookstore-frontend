@@ -108,44 +108,33 @@ export async function fetchChapter(bookId: string, chapterNumber: number): Promi
   return data;
 }
 
-// Fire-and-forget view logger - works on both web and mobile
+// Fire-and-forget view logger (web only)
 export async function logBookView(bookId: string): Promise<void> {
   try {
-    if (!API_BASE_URL) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('API_BASE_URL not configured, skipping view log');
-      }
-      return;
-    }
-
-    if (!bookId) {
-      return;
-    }
-
-    // Ensure URL doesn't have trailing slash
-    const baseUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-    const url = `${baseUrl}/books/${encodeURIComponent(bookId)}/view`;
+    // Get API URL - prefer environment variable for web
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || API_BASE_URL;
     
-    // Fire-and-forget: don't wait for response, just send it
-    // This ensures view logging doesn't block the UI
-    fetch(url, {
+    if (!apiUrl) {
+      console.warn('API_BASE_URL not configured, skipping view log');
+      return;
+    }
+
+    const url = `${apiUrl}/books/${encodeURIComponent(bookId)}/view`;
+    
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Keepalive ensures request completes even if page unloads (web only)
-      ...(typeof navigator !== 'undefined' && { keepalive: true }),
-    }).catch((error) => {
-      // Silently fail - we don't want to interrupt user experience
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('Failed to log book view:', error);
-      }
+      // Don't wait for response - fire and forget
     });
-  } catch (error) {
-    // Silently fail - we don't want to interrupt user experience
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('Error in logBookView:', error);
+
+    if (!response.ok) {
+      console.warn(`View logging failed: ${response.status} ${response.statusText}`);
     }
+  } catch (error) {
+    // Silently fail - view logging shouldn't break the app
+    console.warn('Failed to log book view:', error);
   }
 }
 

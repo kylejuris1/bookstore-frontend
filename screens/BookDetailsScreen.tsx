@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, ActivityIndicator, Pressable, useWindowDimensions } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, ActivityIndicator, Pressable, useWindowDimensions, Platform } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { fetchBook, fetchChapters, logBookView, type Book } from "../lib/api"
@@ -74,10 +74,12 @@ export default function BookDetailsScreen() {
     }
   }, [bookId])
 
-  // Log a view when the book details page is viewed
+  // Log a view when the book details page is viewed (web only)
   useEffect(() => {
-    if (bookId && book) {
-      logBookView(bookId)
+    if (Platform.OS === 'web' && bookId && book) {
+      logBookView(bookId).catch((error) => {
+        console.error('Failed to log book view on web:', error)
+      })
     }
   }, [bookId, book])
 
