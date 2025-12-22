@@ -111,6 +111,10 @@ export async function fetchChapter(bookId: string, chapterNumber: number): Promi
 // Fire-and-forget view logger
 export async function logBookView(bookId: string): Promise<void> {
   try {
+    if (!API_BASE_URL) {
+      console.warn('API_BASE_URL not configured, skipping view log');
+      return;
+    }
     await fetch(`${API_BASE_URL}/books/${encodeURIComponent(bookId)}/view`, {
       method: 'POST',
     });

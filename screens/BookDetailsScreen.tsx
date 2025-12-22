@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, ActivityIndicator, Pressable, useWindowDimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
-import { fetchBook, fetchChapters, type Book } from "../lib/api"
+import { fetchBook, fetchChapters, logBookView, type Book } from "../lib/api"
 import { useTheme } from "../context/ThemeContext"
 import { useLibrary } from "../context/LibraryContext"
 import NavigationHeader from "../components/NavigationHeader"
@@ -73,6 +73,13 @@ export default function BookDetailsScreen() {
       cancelled = true
     }
   }, [bookId])
+
+  // Log a view when the book details page is viewed
+  useEffect(() => {
+    if (bookId && book) {
+      logBookView(bookId)
+    }
+  }, [bookId, book])
 
   const handleRead = () => {
     if (!book) return
