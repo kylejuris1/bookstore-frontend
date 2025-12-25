@@ -21,7 +21,7 @@ import { useRouter, useSegments } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
-import BookCard from "../components/BookCard"
+import BookCard, { formatViews } from "../components/BookCard"
 import { fetchBooks, type Book } from "../lib/api"
 import TopUpModal from "../components/TopUpModal"
 import Footer from "../components/Footer"
@@ -474,7 +474,7 @@ export default function HomeScreen() {
                               {item.author}
                             </Text>
                             <Text style={[styles.tagCardViews, { color: theme.textSecondary }]} numberOfLines={1}>
-                              {getViewsValue(item).toLocaleString()} views
+                              {formatViews(getViewsValue(item))} views
                             </Text>
                           </View>
                         </Pressable>

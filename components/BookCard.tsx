@@ -24,7 +24,7 @@ type BookCardProps = {
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
 
-const formatViews = (views?: number) => {
+export const formatViews = (views?: number) => {
   const v = typeof views === "number" ? views : 0
   if (v >= 1_000_000_000) return `${(v / 1_000_000_000).toFixed(1).replace(/\.0$/, "")}B`
   if (v >= 1_000_000) return `${(v / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`

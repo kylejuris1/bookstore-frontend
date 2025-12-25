@@ -16,6 +16,7 @@ import { useRouter } from "expo-router"
 import { useTheme } from "../context/ThemeContext"
 import NavigationHeader from "../components/NavigationHeader"
 import { fetchBooks, type Book } from "../lib/api"
+import { formatViews } from "../components/BookCard"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
 
@@ -146,7 +147,7 @@ export default function TagBooksScreen({ tagName }: TagBooksScreenProps) {
                         {item.author}
                       </Text>
                       <Text style={[styles.bookViews, { color: theme.textSecondary }]}>
-                        {getViewsValue(item).toLocaleString()} views
+                        {formatViews(getViewsValue(item))} views
                       </Text>
                     </View>
                   </Pressable>
