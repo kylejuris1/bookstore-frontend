@@ -152,7 +152,6 @@ export default function BookDetailsScreen() {
               <Ionicons name="arrow-back" size={24} color={theme.text} />
             </Pressable>
             <View style={styles.heroActions}>
-              <Ionicons name="share-social-outline" size={22} color={theme.text} />
               <Pressable onPress={() => book && toggleBookmark(book.book_id)} hitSlop={8}>
                 <Ionicons 
                   name={book && isBookmarked(book.book_id) ? "bookmark" : "bookmark-outline"} 
@@ -174,13 +173,6 @@ export default function BookDetailsScreen() {
               <Text style={[styles.submeta, { color: theme.textSecondary }]}>
                 Words: — | Ongoing
               </Text>
-              <View style={styles.tagRow}>
-                {(book.tags || []).slice(0, 4).map((tag) => (
-                  <View key={tag} style={[styles.tag, { backgroundColor: theme.muted }]}>
-                    <Text style={[styles.tagText, { color: theme.text }]}>{tag}</Text>
-                  </View>
-                ))}
-              </View>
             </View>
           </View>
         </View>
@@ -207,9 +199,14 @@ export default function BookDetailsScreen() {
           </View>
           <View style={styles.tagsWrap}>
             {(book.tags || []).map((tag) => (
-              <View key={tag} style={[styles.tag, { backgroundColor: theme.muted }]}>
-                <Text style={[styles.tagText, { color: theme.text }]}>{tag}</Text>
-              </View>
+              <Pressable
+                key={tag}
+                onPress={() => router.push({ pathname: "/tag/[tagName]", params: { tagName: encodeURIComponent(tag) } })}
+              >
+                <View style={[styles.tag, { backgroundColor: theme.muted }]}>
+                  <Text style={[styles.tagText, { color: theme.text }]}>{tag}</Text>
+                </View>
+              </Pressable>
             ))}
           </View>
         </View>
@@ -276,12 +273,6 @@ const styles = StyleSheet.create({
   submeta: {
     fontSize: 12,
     fontWeight: "500",
-  },
-  tagRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 8,
   },
   tag: {
     paddingHorizontal: 10,

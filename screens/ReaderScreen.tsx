@@ -6,7 +6,6 @@ import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
 import { fetchChapters, fetchChapter, logBookView, type Chapter } from "../lib/api"
-import TopUpModal from "../components/TopUpModal"
 import NavigationHeader from "../components/NavigationHeader"
 
 const CHAPTER_COST = 50
@@ -44,7 +43,6 @@ export default function ReaderScreen() {
   const [chapter, setChapter] = useState<Chapter | null>(null)
   const [totalChapters, setTotalChapters] = useState(30)
   const [isLoadingChapter, setIsLoadingChapter] = useState(true)
-  const [showTopUpModal, setShowTopUpModal] = useState(false)
   const isWebBlocked = isWeb && currentChapter >= 2
 
   // Load chapter data from Supabase - only depend on bookId and currentChapter
@@ -334,7 +332,7 @@ export default function ReaderScreen() {
                 onPress={() => {
                   if (credits < CHAPTER_COST) {
                     setShowPaywall(false)
-                    setShowTopUpModal(true)
+                    // Web doesn't support payments - just close the paywall
                   } else {
                     handleUnlockChapter()
                   }
@@ -349,7 +347,6 @@ export default function ReaderScreen() {
           </View>
         </View>
       </Modal>
-      <TopUpModal visible={showTopUpModal} onClose={() => setShowTopUpModal(false)} />
     </SafeAreaView>
   )
 }

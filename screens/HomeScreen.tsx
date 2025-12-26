@@ -23,7 +23,6 @@ import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
 import BookCard, { formatViews } from "../components/BookCard"
 import { fetchBooks, type Book } from "../lib/api"
-import TopUpModal from "../components/TopUpModal"
 import Footer from "../components/Footer"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
@@ -42,7 +41,6 @@ export default function HomeScreen() {
   const { credits, isLoading: libraryLoading } = useLibrary()
   const [books, setBooks] = useState<Book[]>([])
   const [isLoadingBooks, setIsLoadingBooks] = useState(true)
-  const [showTopUpModal, setShowTopUpModal] = useState(false)
   const isWeb = Platform.OS === "web"
   
   // Calculate responsive padding based on window width
@@ -297,11 +295,7 @@ export default function HomeScreen() {
           <Pressable 
             style={[styles.topUpButton, { backgroundColor: theme.primary }]} 
             onPress={() => {
-              if (isWeb) {
-                Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
-                return
-              }
-              setShowTopUpModal(true)
+              Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
             }}
           >
             <Text style={styles.topUpButtonText}>Continue Reading for FREE</Text>
@@ -498,7 +492,6 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      {!isWeb && <TopUpModal visible={showTopUpModal} onClose={() => setShowTopUpModal(false)} />}
     </SafeAreaView>
   )
 }
