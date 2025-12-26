@@ -188,11 +188,6 @@ export default function BookDetailsScreen() {
           </View>
         </View>
 
-        <View style={[styles.summarySection, { marginHorizontal: horizontalPadding }]}>
-          <Text style={[styles.sectionTitle, { color: theme.text }]}>Summary</Text>
-          <Text style={[styles.summary, { color: theme.textSecondary }]}>{summary}</Text>
-        </View>
-
         <View style={[styles.tagsSection, { marginHorizontal: horizontalPadding }]}>
           <View style={styles.tagsHeader}>
             <Text style={[styles.sectionTitle, { color: theme.text }]}>Tags</Text>
@@ -209,6 +204,11 @@ export default function BookDetailsScreen() {
               </Pressable>
             ))}
           </View>
+        </View>
+
+        <View style={[styles.summarySection, { marginHorizontal: horizontalPadding }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>Summary</Text>
+          <Text style={[styles.summary, { color: theme.textSecondary }]}>{summary}</Text>
         </View>
 
         <View style={[styles.chaptersHeader, { paddingHorizontal: horizontalPadding }]}>
