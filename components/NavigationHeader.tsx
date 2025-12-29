@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     minWidth: 150,
     maxWidth: 250,
-    width: 200,
+    flex: 0,
   },
   searchContainerPlaceholder: {
     borderWidth: 0,

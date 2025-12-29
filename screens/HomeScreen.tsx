@@ -42,6 +42,19 @@ export default function HomeScreen() {
   const [books, setBooks] = useState<Book[]>([])
   const [isLoadingBooks, setIsLoadingBooks] = useState(true)
   const isWeb = Platform.OS === "web"
+  const [resizeKey, setResizeKey] = useState(0)
+  
+  // Force re-render on window resize for web
+  useEffect(() => {
+    if (!isWeb || typeof window === 'undefined') return
+    
+    const handleResize = () => {
+      setResizeKey(prev => prev + 1)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isWeb])
   
   // Calculate responsive padding based on window width
   const horizontalPadding = useMemo(() => {
@@ -355,7 +368,7 @@ export default function HomeScreen() {
 
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Popular</Text>
         <FlatList
-          key={`popular-${numColumns}`}
+          key={`popular-${numColumns}-${windowDimensions.width}-${resizeKey}`}
           data={popularBooks}
           renderItem={({ item }) => {
             // Convert Supabase book format to BookCard format
@@ -431,7 +444,7 @@ export default function HomeScreen() {
               </View>
               <View style={styles.tagShowcaseContainer}>
                 <FlatList
-                  key={`${section.tag}-${tagColumns}`}
+                  key={`${section.tag}-${tagColumns}-${windowDimensions.width}-${resizeKey}`}
                   data={paddedBooks}
                   renderItem={({ item }) => {
                     if (!item) {
