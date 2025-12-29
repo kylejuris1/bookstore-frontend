@@ -1,5 +1,5 @@
 import React from "react"
-import { View, Image, Text, StyleSheet, Pressable, Alert } from "react-native"
+import { View, Image, Text, StyleSheet, Pressable, Alert, useWindowDimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
@@ -37,8 +37,13 @@ export default function BookCard({ book, onPress, rank }: BookCardProps) {
   const { theme } = useTheme()
   const { user } = useAuth()
   const router = useRouter()
+  const windowDimensions = useWindowDimensions()
   const [imageError, setImageError] = React.useState(false)
   const isBookmarkedValue = isBookmarked(book.id)
+  
+  // Show bookmark text only when there's enough space
+  // Hide text when window is narrow to prevent button overflow
+  const showBookmarkText = windowDimensions.width >= 768
 
   const handleToggleBookmark = async () => {
     await toggleBookmark(book.id)
@@ -115,14 +120,16 @@ export default function BookCard({ book, onPress, rank }: BookCardProps) {
                 size={16}
                 color={isBookmarkedValue ? "#fff" : theme.primary}
               />
-              <Text
-                style={[
-                  styles.bookmarkText,
-                  { color: isBookmarkedValue ? "#fff" : theme.primary },
-                ]}
-              >
-                {isBookmarkedValue ? "Bookmarked" : "Bookmark"}
-              </Text>
+              {showBookmarkText && (
+                <Text
+                  style={[
+                    styles.bookmarkText,
+                    { color: isBookmarkedValue ? "#fff" : theme.primary },
+                  ]}
+                >
+                  {isBookmarkedValue ? "Bookmarked" : "Bookmark"}
+                </Text>
+              )}
             </Pressable>
           </View>
         </View>
@@ -192,6 +199,7 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 6,
     justifyContent: "space-between",
+    minWidth: 0,
   },
   title: {
     fontSize: 16,
@@ -224,11 +232,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: 4,
+    flexWrap: "wrap",
+    gap: 8,
   },
   infoContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
+    flexShrink: 1,
+    minWidth: 0,
   },
   info: {
     fontSize: 12,
@@ -242,6 +254,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     gap: 6,
+    flexShrink: 0,
+    maxWidth: "100%",
   },
   bookmarkText: {
     fontSize: 12,

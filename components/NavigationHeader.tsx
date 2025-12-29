@@ -47,8 +47,7 @@ export default function NavigationHeader() {
           <Text style={[styles.titlePage, { color: theme.text }]}>Page</Text>
         </Text>
       </Pressable>
-      <View style={styles.headerNavWrapper}>
-        <View style={styles.headerNav}>
+      <View style={styles.headerNav}>
         <Pressable
           style={styles.navButton}
           onPress={() => router.push("/(tabs)")}
@@ -113,7 +112,6 @@ export default function NavigationHeader() {
             ]}>Profile</Text>
           )}
         </Pressable>
-        </View>
       </View>
       <View style={styles.headerRight}>
         {windowDimensions.width >= 768 && (
@@ -182,23 +180,14 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     letterSpacing: 0.3,
   },
-  headerNavWrapper: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    pointerEvents: "box-none",
-    zIndex: 1,
-  },
   headerNav: {
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
     flexWrap: "nowrap",
-    pointerEvents: "auto",
+    flex: 1,
+    justifyContent: "center",
+    marginHorizontal: 16,
   },
   navButton: {
     flexDirection: "row",
