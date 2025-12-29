@@ -266,7 +266,7 @@ export default function HomeScreen() {
               size={20} 
               color={currentRoute === "index" ? theme.primary : theme.textSecondary} 
             />
-            {windowDimensions.width >= 640 && (
+            {windowDimensions.width >= 900 && (
             <Text style={[
               styles.navButtonText,
               { color: currentRoute === "index" ? theme.primary : theme.textSecondary }
@@ -282,7 +282,7 @@ export default function HomeScreen() {
               size={20} 
               color={currentRoute === "library" ? theme.primary : theme.textSecondary} 
             />
-            {windowDimensions.width >= 640 && (
+            {windowDimensions.width >= 900 && (
             <Text style={[
               styles.navButtonText,
               { color: currentRoute === "library" ? theme.primary : theme.textSecondary }
@@ -298,7 +298,7 @@ export default function HomeScreen() {
               size={20} 
               color={currentRoute === "rank" ? theme.primary : theme.textSecondary} 
             />
-            {windowDimensions.width >= 640 && (
+            {windowDimensions.width >= 900 && (
             <Text style={[
               styles.navButtonText,
               { color: currentRoute === "rank" ? theme.primary : theme.textSecondary }
@@ -314,7 +314,7 @@ export default function HomeScreen() {
               size={20} 
               color={currentRoute === "profile" ? theme.primary : theme.textSecondary} 
             />
-            {windowDimensions.width >= 640 && (
+            {windowDimensions.width >= 900 && (
             <Text style={[
               styles.navButtonText,
               { color: currentRoute === "profile" ? theme.primary : theme.textSecondary }
@@ -555,8 +555,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 12,
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
     gap: 12,
+    minHeight: 48,
   },
   headerNav: {
     flexDirection: "row",
@@ -564,7 +565,7 @@ const styles = StyleSheet.create({
     gap: 16,
     flex: 1,
     justifyContent: "center",
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
   },
   navButton: {
     flexDirection: "row",

@@ -58,7 +58,7 @@ export default function NavigationHeader() {
             size={20} 
             color={currentRoute === "index" ? theme.primary : theme.textSecondary} 
           />
-          {windowDimensions.width >= 640 && (
+          {windowDimensions.width >= 900 && (
             <Text style={[
               styles.navButtonText,
               { color: currentRoute === "index" ? theme.primary : theme.textSecondary }
@@ -74,7 +74,7 @@ export default function NavigationHeader() {
             size={20} 
             color={currentRoute === "library" ? theme.primary : theme.textSecondary} 
           />
-          {windowDimensions.width >= 640 && (
+          {windowDimensions.width >= 900 && (
             <Text style={[
               styles.navButtonText,
               { color: currentRoute === "library" ? theme.primary : theme.textSecondary }
@@ -90,7 +90,7 @@ export default function NavigationHeader() {
             size={20} 
             color={currentRoute === "rank" ? theme.primary : theme.textSecondary} 
           />
-          {windowDimensions.width >= 640 && (
+          {windowDimensions.width >= 900 && (
             <Text style={[
               styles.navButtonText,
               { color: currentRoute === "rank" ? theme.primary : theme.textSecondary }
@@ -106,7 +106,7 @@ export default function NavigationHeader() {
             size={20} 
             color={currentRoute === "profile" ? theme.primary : theme.textSecondary} 
           />
-          {windowDimensions.width >= 640 && (
+          {windowDimensions.width >= 900 && (
             <Text style={[
               styles.navButtonText,
               { color: currentRoute === "profile" ? theme.primary : theme.textSecondary }
@@ -155,16 +155,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 12,
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
     gap: 12,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0,0,0,0.1)",
+    minHeight: 48,
   },
   titleContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
     zIndex: 0,
+    flexShrink: 0,
   },
   titleBase: {
     fontSize: 28,
@@ -195,7 +197,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 16,
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
     pointerEvents: "auto",
   },
   navButton: {
@@ -213,9 +215,10 @@ const styles = StyleSheet.create({
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
-    flexWrap: "wrap",
+    flexWrap: "nowrap",
     gap: 8,
     zIndex: 0,
+    flexShrink: 0,
   },
   searchContainer: {
     flexDirection: "row",
