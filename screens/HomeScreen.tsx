@@ -367,6 +367,7 @@ export default function HomeScreen() {
         )}
 
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Popular</Text>
+        <View style={styles.popularContainer}>
         <FlatList
           key={`popular-${numColumns}-${windowDimensions.width}-${resizeKey}`}
           data={popularBooks}
@@ -389,7 +390,7 @@ export default function HomeScreen() {
             const hasProgress = !!progress
             const lastChapter = progress?.lastChapter
             return (
-              <View style={{ flex: 1, maxWidth: popularBookCardMaxWidth }}>
+              <View style={{ width: popularBookCardMaxWidth }}>
               <BookCard 
                 book={bookCardData} 
                 onPress={() => {
@@ -409,9 +410,10 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.book_id}
           scrollEnabled={false}
           numColumns={numColumns}
-          columnWrapperStyle={numColumns > 1 ? { columnGap: 16, justifyContent: "flex-start" } : undefined}
-          contentContainerStyle={{ rowGap: 16, paddingBottom: 24 }}
+          columnWrapperStyle={numColumns > 1 ? { columnGap: 16, justifyContent: "center" } : undefined}
+          contentContainerStyle={{ rowGap: 16, paddingBottom: 24, alignItems: "center" }}
         />
+        </View>
 
         <View style={[styles.promoBanner, { backgroundColor: "#fce7f3", marginHorizontal: -horizontalPadding }]}>
           <View style={styles.promoBannerContent}>
@@ -726,6 +728,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   tagShowcaseContainer: {
+    alignItems: "center",
+  },
+  popularContainer: {
     alignItems: "center",
   },
   tagCardWrapper: {
