@@ -17,12 +17,25 @@ export default function NavigationHeader() {
   
   const currentRoute = segments[segments.length - 1] || "index"
   
-  // Calculate responsive padding
+  // Calculate responsive padding with smooth transitions
   const horizontalPadding = React.useMemo(() => {
     const width = windowDimensions.width
-    if (width < 640) return 16 // Mobile
-    if (width < 1024) return width * 0.1 // Tablet
-    return width * 0.2 // Desktop
+    // Smooth interpolation: gradually reduce padding as window gets smaller
+    if (width < 640) {
+      return 16
+    } else if (width < 1024) {
+      const minPadding = 16
+      const maxPadding = width * 0.1
+      const ratio = (width - 640) / (1024 - 640)
+      return minPadding + (maxPadding - minPadding) * ratio
+    } else if (width < 1920) {
+      const minPadding = width * 0.1
+      const maxPadding = Math.min(width * 0.2, 384)
+      const ratio = (width - 1024) / (1920 - 1024)
+      return minPadding + (maxPadding - minPadding) * ratio
+    } else {
+      return Math.min(width * 0.2, 384)
+    }
   }, [windowDimensions.width])
 
   return (

@@ -56,19 +56,50 @@ export default function HomeScreen() {
     return () => window.removeEventListener('resize', handleResize)
   }, [isWeb])
   
-  // Calculate responsive padding based on window width
+  // Calculate responsive padding with smooth transitions
   const horizontalPadding = useMemo(() => {
     const width = windowDimensions.width
-    if (width < 640) return 16 // Mobile
-    if (width < 1024) return width * 0.1 // Tablet
-    return width * 0.2 // Desktop
+    // Smooth interpolation: gradually reduce padding as window gets smaller
+    // Min padding: 16px, Max padding: 20% of width (capped at reasonable max)
+    if (width < 640) {
+      // Mobile: fixed small padding
+      return 16
+    } else if (width < 1024) {
+      // Tablet: interpolate between 16 and 10% of width
+      const minPadding = 16
+      const maxPadding = width * 0.1
+      const ratio = (width - 640) / (1024 - 640)
+      return minPadding + (maxPadding - minPadding) * ratio
+    } else if (width < 1920) {
+      // Desktop: interpolate between 10% and 20% of width
+      const minPadding = width * 0.1
+      const maxPadding = Math.min(width * 0.2, 384) // Cap at 384px (20% of 1920px)
+      const ratio = (width - 1024) / (1920 - 1024)
+      return minPadding + (maxPadding - minPadding) * ratio
+    } else {
+      // Large desktop: cap at 20% but don't exceed 384px
+      return Math.min(width * 0.2, 384)
+    }
   }, [windowDimensions.width])
   
   const tagShowcasePadding = useMemo(() => {
     const width = windowDimensions.width
-    if (width < 640) return 16 // Mobile
-    if (width < 1024) return width * 0.15 // Tablet
-    return width * 0.31 // Desktop
+    // Similar smooth interpolation for tag showcase
+    if (width < 640) {
+      return 16
+    } else if (width < 1024) {
+      const minPadding = 16
+      const maxPadding = width * 0.15
+      const ratio = (width - 640) / (1024 - 640)
+      return minPadding + (maxPadding - minPadding) * ratio
+    } else if (width < 1920) {
+      const minPadding = width * 0.15
+      const maxPadding = Math.min(width * 0.31, 595) // Cap at 595px (31% of 1920px)
+      const ratio = (width - 1024) / (1920 - 1024)
+      return minPadding + (maxPadding - minPadding) * ratio
+    } else {
+      return Math.min(width * 0.31, 595)
+    }
   }, [windowDimensions.width])
   
   // Responsive number of columns for popular books
@@ -367,7 +398,6 @@ export default function HomeScreen() {
         )}
 
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Popular</Text>
-        <View style={styles.popularContainer}>
         <FlatList
           key={`popular-${numColumns}-${windowDimensions.width}-${resizeKey}`}
           data={popularBooks}
@@ -390,7 +420,7 @@ export default function HomeScreen() {
             const hasProgress = !!progress
             const lastChapter = progress?.lastChapter
             return (
-              <View style={{ width: popularBookCardMaxWidth }}>
+              <View style={{ flex: 1, maxWidth: popularBookCardMaxWidth }}>
               <BookCard 
                 book={bookCardData} 
                 onPress={() => {
@@ -410,10 +440,9 @@ export default function HomeScreen() {
           keyExtractor={(item) => item.book_id}
           scrollEnabled={false}
           numColumns={numColumns}
-          columnWrapperStyle={numColumns > 1 ? { columnGap: 16, justifyContent: "center" } : undefined}
-          contentContainerStyle={{ rowGap: 16, paddingBottom: 24, alignItems: "center" }}
+          columnWrapperStyle={numColumns > 1 ? { columnGap: 16, justifyContent: "flex-start" } : undefined}
+          contentContainerStyle={{ rowGap: 16, paddingBottom: 24 }}
         />
-        </View>
 
         <View style={[styles.promoBanner, { backgroundColor: "#fce7f3", marginHorizontal: -horizontalPadding }]}>
           <View style={styles.promoBannerContent}>
@@ -728,9 +757,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   tagShowcaseContainer: {
-    alignItems: "center",
-  },
-  popularContainer: {
     alignItems: "center",
   },
   tagCardWrapper: {

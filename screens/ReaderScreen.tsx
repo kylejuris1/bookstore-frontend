@@ -28,9 +28,22 @@ export default function ReaderScreen() {
   
   const horizontalPadding = useMemo(() => {
     const width = windowDimensions.width
-    if (width < 640) return 16 // Mobile
-    if (width < 1024) return width * 0.15 // Tablet
-    return width * 0.31 // Desktop - 31% spacing
+    // Smooth interpolation for reader screen
+    if (width < 640) {
+      return 16
+    } else if (width < 1024) {
+      const minPadding = 16
+      const maxPadding = width * 0.15
+      const ratio = (width - 640) / (1024 - 640)
+      return minPadding + (maxPadding - minPadding) * ratio
+    } else if (width < 1920) {
+      const minPadding = width * 0.15
+      const maxPadding = Math.min(width * 0.31, 595)
+      const ratio = (width - 1024) / (1920 - 1024)
+      return minPadding + (maxPadding - minPadding) * ratio
+    } else {
+      return Math.min(width * 0.31, 595)
+    }
   }, [windowDimensions.width])
   
   const [currentChapter, setCurrentChapter] = useState(() => {
