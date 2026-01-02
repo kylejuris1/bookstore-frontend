@@ -46,7 +46,10 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "meta": {
+        "google-site-verification": "f4hE6CjKLJ6awC43ORfLGx9m34-MYJy13FZ3qqSpNw8"
+      }
     },
     "scheme": "bookstore",
     "plugins": [
