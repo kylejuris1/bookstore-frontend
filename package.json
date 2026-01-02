@@ -11,7 +11,7 @@
     "preview": "expo preview",
     "start": "expo start",
     "web": "expo start --web",
-    "web:export": "expo export --platform web"
+    "web:export": "expo export --platform web && node scripts/inject-meta.js"
   },
   "dependencies": {
     "@expo/dom-webview": "latest",
