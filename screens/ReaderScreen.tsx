@@ -9,7 +9,7 @@ import { fetchChapters, fetchChapter, logBookView, type Chapter } from "../lib/a
 import NavigationHeader from "../components/NavigationHeader"
 
 const CHAPTER_COST = 50
-const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.bookstore.harba.app"
+const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
 
 export default function ReaderScreen() {
   const router = useRouter()

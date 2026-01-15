@@ -5,7 +5,7 @@ import { useRouter, useSegments } from "expo-router"
 import { useTheme } from "../context/ThemeContext"
 import { useLibrary } from "../context/LibraryContext"
 
-const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.bookstore.harba.app"
+const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
 
 export default function NavigationHeader() {
   const router = useRouter()
@@ -47,7 +47,7 @@ export default function NavigationHeader() {
           <Text style={[styles.titlePage, { color: theme.text }]}>Page</Text>
         </Text>
       </Pressable>
-      <View style={styles.headerNav}>
+        <View style={styles.headerNav}>
         <Pressable
           style={styles.navButton}
           onPress={() => router.push("/(tabs)")}

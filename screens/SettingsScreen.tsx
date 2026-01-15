@@ -8,7 +8,7 @@ import { useRouter } from "expo-router"
 import { fetchBook } from "../lib/api"
 import NavigationHeader from "../components/NavigationHeader"
 
-const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.bookstore.harba.app"
+const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
 
 export default function SettingsScreen() {
   const { user, sendOTP, verifyOTP, signOut, loading } = useAuth()

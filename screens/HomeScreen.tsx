@@ -26,7 +26,7 @@ import { fetchBooks, type Book } from "../lib/api"
 import Footer from "../components/Footer"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
-const APP_DOWNLOAD_URL = "https://play.google.com/store/apps/details?id=com.bookstore.harba.app"
+const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
 
 export default function HomeScreen() {
   const router = useRouter()
@@ -339,7 +339,7 @@ export default function HomeScreen() {
           <Pressable 
             style={[styles.topUpButton, { backgroundColor: theme.primary }]} 
             onPress={() => {
-              Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
+                Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
             }}
           >
             <Text style={styles.topUpButtonText}>Continue Reading for FREE</Text>
