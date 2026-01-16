@@ -1,12 +1,13 @@
-import { useState, useEffect, useMemo, useRef } from "react"
+import { useState, useEffect, useMemo } from "react"
 import React from "react"
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, useWindowDimensions, Image, Animated } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, useWindowDimensions } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
 import { fetchChapters, fetchChapter, logBookView, type Chapter } from "../lib/api"
 import NavigationHeader from "../components/NavigationHeader"
+import PromotionalBanner from "../components/PromotionalBanner"
 
 const CHAPTER_COST = 50
 const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
@@ -57,28 +58,6 @@ export default function ReaderScreen() {
   const [totalChapters, setTotalChapters] = useState(30)
   const [isLoadingChapter, setIsLoadingChapter] = useState(true)
   const isWebBlocked = isWeb && currentChapter >= 6
-  
-  // Shine animation for download button
-  const shineAnim = useRef(new Animated.Value(-1)).current
-  
-  useEffect(() => {
-    const shineAnimation = Animated.loop(
-      Animated.sequence([
-        Animated.timing(shineAnim, {
-          toValue: 1,
-          duration: 2000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(shineAnim, {
-          toValue: -1,
-          duration: 0,
-          useNativeDriver: true,
-        }),
-      ])
-    )
-    shineAnimation.start()
-    return () => shineAnimation.stop()
-  }, [shineAnim])
 
   // Load chapter data from Supabase - only depend on bookId and currentChapter
   useEffect(() => {
@@ -275,40 +254,10 @@ export default function ReaderScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* Promotional Banner */}
-      <View style={styles.promotionalBanner}>
-        <View style={styles.bannerLeft}>
-          <Image source={require("../assets/icon.png")} style={styles.bannerIcon} />
-          <View style={styles.bannerTextContainer}>
-            <Text style={styles.bannerTitle}>NextPage</Text>
-            <Text style={styles.bannerSubtitle}>Download the book for free</Text>
-          </View>
-        </View>
-        <Pressable 
-          style={styles.bannerDownloadButton}
-          onPress={handleContinueOnApp}
-        >
-          <Animated.View
-            style={[
-              styles.shineOverlay,
-              {
-                transform: [
-                  {
-                    translateX: shineAnim.interpolate({
-                      inputRange: [-1, 1],
-                      outputRange: [-200, 200],
-                    }),
-                  },
-                ],
-              },
-            ]}
-          />
-          <Text style={styles.bannerDownloadButtonText}>Download</Text>
-        </Pressable>
-      </View>
-      
+      <PromotionalBanner />
       <NavigationHeader />
-      <View style={[styles.header, { borderBottomColor: theme.border, paddingHorizontal: horizontalPadding }]}>
+      {/* Fixed header with book title and back button */}
+      <View style={[styles.fixedHeader, { borderBottomColor: theme.border, backgroundColor: theme.background, paddingHorizontal: horizontalPadding }]}>
         <Pressable onPress={() => {
           if (bookId) {
             router.push({ pathname: "/book/[bookId]", params: { bookId } })
@@ -333,7 +282,7 @@ export default function ReaderScreen() {
         <View style={{ width: 28 }} />
       </View>
 
-      <ScrollView style={[styles.content, { paddingHorizontal: horizontalPadding }]} showsVerticalScrollIndicator={false}>
+      <ScrollView style={[styles.content, { paddingHorizontal: horizontalPadding, paddingTop: 60 }]} showsVerticalScrollIndicator={false}>
         {renderContent()}
         {!isLoadingChapter && !isWebBlocked && chapter && !isLocked && (
           <View style={styles.continueSection}>
@@ -383,19 +332,17 @@ export default function ReaderScreen() {
             </Pressable>
           </View>
         )}
-      </ScrollView>
-
-      {/* Persistent floating Download button */}
-      {windowDimensions.width >= 640 && (
-        <View style={[styles.floatingDownloadButtonContainer, { width: windowDimensions.width }]}>
+        
+        {/* Download the Book button in reader area */}
+        <View style={styles.readerDownloadSection}>
           <Pressable 
-            style={styles.floatingDownloadButton}
+            style={styles.readerDownloadButton}
             onPress={handleContinueOnApp}
           >
-            <Text style={styles.floatingDownloadButtonText}>Download the Book</Text>
+            <Text style={styles.readerDownloadButtonText}>Download the Book</Text>
           </Pressable>
         </View>
-      )}
+      </ScrollView>
 
       <Modal visible={showPaywall} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -443,6 +390,19 @@ export default function ReaderScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  fixedHeader: {
+    position: "absolute",
+    top: 18,
+    left: 0,
+    right: 0,
+    zIndex: 100,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    backgroundColor: "inherit",
   },
   header: {
     flexDirection: "row",
@@ -604,18 +564,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  floatingDownloadButtonContainer: {
-    position: "absolute",
-    bottom: 90,
-    left: 0,
-    right: 0,
+  readerDownloadSection: {
     alignItems: "center",
-    zIndex: 1000,
-    pointerEvents: "box-none",
+    paddingVertical: 24,
+    marginTop: 20,
   },
-  floatingDownloadButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+  readerDownloadButton: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
     borderRadius: 20,
     backgroundColor: "#FFD700",
     shadowColor: "#000",
@@ -626,67 +582,10 @@ const styles = StyleSheet.create({
     minWidth: 200,
     alignItems: "center",
   },
-  floatingDownloadButtonText: {
-    fontSize: 14,
+  readerDownloadButtonText: {
+    fontSize: 16,
     fontWeight: "600",
     color: "#000",
-  },
-  promotionalBanner: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "#FFD700",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 12,
-  },
-  bannerLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-  },
-  bannerIcon: {
-    width: 48,
-    height: 48,
-    resizeMode: "contain",
-  },
-  bannerTextContainer: {
-    flexDirection: "column",
-    gap: 2,
-  },
-  bannerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#000",
-  },
-  bannerSubtitle: {
-    fontSize: 12,
-    color: "#000",
-  },
-  bannerDownloadButton: {
-    backgroundColor: "#000",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-    overflow: "hidden",
-    position: "relative",
-  },
-  shineOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    width: 50,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
-    transform: [{ skewX: "-20deg" }],
-  },
-  bannerDownloadButtonText: {
-    color: "#fff",
-    fontSize: 14,
-    fontWeight: "600",
-    zIndex: 1,
   },
   continueSection: {
     alignItems: "center",

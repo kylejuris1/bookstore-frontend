@@ -15,6 +15,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
 import { useTheme } from "../context/ThemeContext"
 import NavigationHeader from "../components/NavigationHeader"
+import PromotionalBanner from "../components/PromotionalBanner"
 import { fetchBooks, type Book } from "../lib/api"
 import { formatViews } from "../components/BookCard"
 
@@ -101,6 +102,7 @@ export default function TagBooksScreen({ tagName }: TagBooksScreenProps) {
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <PromotionalBanner />
         <NavigationHeader />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.primary} />
@@ -111,6 +113,7 @@ export default function TagBooksScreen({ tagName }: TagBooksScreenProps) {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <PromotionalBanner />
       <NavigationHeader />
       <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
         <Pressable onPress={() => router.back()} style={styles.backButton}>

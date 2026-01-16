@@ -6,6 +6,8 @@ import { fetchBook, fetchChapters, logBookView, type Book } from "../lib/api"
 import { useTheme } from "../context/ThemeContext"
 import { useLibrary } from "../context/LibraryContext"
 import NavigationHeader from "../components/NavigationHeader"
+import PromotionalBanner from "../components/PromotionalBanner"
+import { Linking, Platform } from "react-native"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
 
@@ -155,8 +157,23 @@ export default function BookDetailsScreen() {
   const summary = (book as any).summary || ""
   const views = (book as any).views
 
+  const isWeb = Platform.OS === "web"
+  const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
+
+  const handleDownload = () => {
+    if (isWeb) {
+      Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
+    }
+  }
+
+  const handleChapters = () => {
+    // Scroll to chapters section or navigate to chapters list
+    // For now, just scroll to chapters
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <PromotionalBanner />
       <NavigationHeader />
       <ScrollView contentContainerStyle={styles.scroll}>
         <View style={[styles.hero, { backgroundColor: theme.card, paddingHorizontal: horizontalPadding }]}>
@@ -211,9 +228,9 @@ export default function BookDetailsScreen() {
                 key={tag}
                 onPress={() => router.push({ pathname: "/tag/[tagName]", params: { tagName: encodeURIComponent(tag) } })}
               >
-                <View style={[styles.tag, { backgroundColor: theme.muted }]}>
-                  <Text style={[styles.tagText, { color: theme.text }]}>{tag}</Text>
-                </View>
+                <View style={styles.tag}>
+                <Text style={styles.tagText}>{tag}</Text>
+              </View>
               </Pressable>
             ))}
           </View>
@@ -232,9 +249,30 @@ export default function BookDetailsScreen() {
         </View>
       </ScrollView>
 
-      <Pressable style={[styles.readButton, { backgroundColor: theme.primary, left: horizontalPadding, right: horizontalPadding }]} onPress={handleRead}>
-        <Text style={styles.readButtonText}>Read</Text>
-      </Pressable>
+      {/* Bottom Navigation Bar */}
+      <View style={[styles.bottomBar, { backgroundColor: theme.background, borderTopColor: theme.border }]}>
+        <Pressable 
+          style={styles.bottomBarButton}
+          onPress={handleChapters}
+        >
+          <Ionicons name="list" size={24} color={theme.textSecondary} />
+          <Text style={[styles.bottomBarButtonText, { color: theme.textSecondary }]}>Chapters</Text>
+        </Pressable>
+        <Pressable 
+          style={[styles.bottomBarButton, styles.readButtonBottom]}
+          onPress={handleRead}
+        >
+          <Ionicons name="book" size={24} color="#fff" />
+          <Text style={styles.readButtonBottomText}>Read</Text>
+        </Pressable>
+        <Pressable 
+          style={styles.bottomBarButton}
+          onPress={handleDownload}
+        >
+          <Ionicons name="download-outline" size={24} color={theme.textSecondary} />
+          <Text style={[styles.bottomBarButtonText, { color: theme.textSecondary }]}>Download</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   )
 }
@@ -291,10 +329,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 14,
+    backgroundColor: "#FF69B4",
   },
   tagText: {
     fontSize: 12,
     fontWeight: "600",
+    color: "#fff",
   },
   statsCard: {
     marginTop: 12,
@@ -353,6 +393,46 @@ const styles = StyleSheet.create({
   chaptersMeta: {
     fontSize: 14,
     fontWeight: "600",
+  },
+  bottomBar: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  bottomBarButton: {
+    flex: 1,
+    alignItems: "center",
+    gap: 4,
+    paddingVertical: 8,
+  },
+  readButtonBottom: {
+    backgroundColor: "#FF69B4",
+    borderRadius: 12,
+    paddingVertical: 12,
+    marginHorizontal: 8,
+    flex: 0,
+    minWidth: 100,
+  },
+  readButtonBottomText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  bottomBarButtonText: {
+    fontSize: 12,
+    fontWeight: "500",
   },
   readButton: {
     position: "absolute",

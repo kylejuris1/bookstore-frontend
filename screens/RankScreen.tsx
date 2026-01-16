@@ -7,6 +7,7 @@ import { useTheme } from "../context/ThemeContext"
 import BookCard from "../components/BookCard"
 import { useLibrary } from "../context/LibraryContext"
 import NavigationHeader from "../components/NavigationHeader"
+import PromotionalBanner from "../components/PromotionalBanner"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
 
@@ -76,6 +77,7 @@ export default function RankScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <PromotionalBanner />
       <NavigationHeader />
       <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
         <Text style={[styles.title, { color: theme.text }]}>Rank</Text>

@@ -8,6 +8,7 @@ import BookCard from "../components/BookCard"
 import { Image } from "react-native"
 import { fetchBooks, type Book } from "../lib/api"
 import NavigationHeader from "../components/NavigationHeader"
+import PromotionalBanner from "../components/PromotionalBanner"
 
 export default function LibraryScreen() {
   const router = useRouter()
@@ -148,6 +149,7 @@ export default function LibraryScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <PromotionalBanner />
       <NavigationHeader />
       <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
         <Text style={[styles.title, { color: theme.text }]}>Library</Text>

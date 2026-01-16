@@ -211,6 +211,7 @@ export default function NavigationHeader() {
               }
             ]}
           >
+            {/* NextPage at the very top */}
             <View style={styles.sidePanelHeader}>
               <Pressable 
                 onPress={() => {
@@ -229,6 +230,7 @@ export default function NavigationHeader() {
                 <Ionicons name="close" size={24} color={theme.text} />
               </Pressable>
             </View>
+            
             <ScrollView style={styles.sidePanelScroll} showsVerticalScrollIndicator={false}>
               <View style={styles.sidePanelNav}>
                 {renderNavButtons(true)}
@@ -255,27 +257,8 @@ export default function NavigationHeader() {
                     ))
                   )}
                 </View>
-                
-                {/* Additional sections */}
-                <Text style={[styles.sidePanelSectionHeading, { color: theme.text }]}>Short Stories</Text>
-                <Text style={[styles.sidePanelSectionHeading, { color: theme.text }]}>Create</Text>
-                <Text style={[styles.sidePanelSectionHeading, { color: theme.text }]}>Writer Benefit</Text>
-                <Text style={[styles.sidePanelSectionHeading, { color: theme.text }]}>Contest</Text>
               </View>
             </ScrollView>
-            
-            {/* Download the Book button - fixed at bottom */}
-              <Pressable
-                style={[styles.sidePanelDownloadButton, { backgroundColor: "#FFD700" }]}
-                onPress={() => {
-                  if (isWeb) {
-                    Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
-                  }
-                  setShowSidePanel(false)
-                }}
-              >
-                <Text style={styles.sidePanelDownloadButtonText}>Download the Book</Text>
-              </Pressable>
           </Animated.View>
         </Pressable>
       )}
@@ -288,12 +271,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 6,
+    paddingVertical: 4.5,
     flexWrap: "nowrap",
     gap: 12,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0,0,0,0.1)",
-    minHeight: 24,
+    minHeight: 18,
   },
   titleContainer: {
     flexDirection: "row",
@@ -375,7 +358,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 280,
-    paddingTop: 60,
+    paddingTop: 20,
     paddingHorizontal: 20,
     paddingBottom: 20,
     shadowColor: "#000",
@@ -389,8 +372,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 32,
-    paddingBottom: 16,
+    marginBottom: 16,
+    paddingBottom: 12,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0,0,0,0.1)",
   },
@@ -400,13 +383,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sidePanelNav: {
-    gap: 8,
+    gap: 2,
   },
   sidePanelNavButton: {
-    paddingVertical: 12,
+    paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   sidePanelScroll: {
     flex: 1,

@@ -248,6 +248,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      <PromotionalBanner />
       <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
         <Pressable onPress={() => router.push("/(tabs)")} style={styles.titleContainer}>
           <Ionicons name="book" size={24} color={theme.primary} />
