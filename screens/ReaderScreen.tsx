@@ -250,26 +250,17 @@ export default function ReaderScreen() {
             {chapter.chapter_content}
           </Text>
           {/* Fade gradient overlay */}
-          {Platform.OS === "web" ? (
-            <View 
-              style={[
-                styles.textFadeOverlay,
-                {
-                  // @ts-ignore - web-specific style
-                  background: `linear-gradient(to bottom, transparent 0%, ${theme.background} 100%)`,
-                }
-              ]} 
-              pointerEvents="none" 
-            />
-          ) : (
-            <View 
-              style={[
-                styles.textFadeOverlay,
-                { backgroundColor: theme.background, opacity: 0.95 }
-              ]} 
-              pointerEvents="none" 
-            />
-          )}
+          <View 
+            style={[
+              styles.textFadeOverlay,
+              { backgroundColor: theme.background },
+              Platform.OS === "web" && {
+                // @ts-ignore - web-specific style
+                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0) 0%, ${theme.background} 100%)`,
+              }
+            ]} 
+            pointerEvents="none" 
+          />
         </View>
       </View>
     )
