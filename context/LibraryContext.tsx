@@ -271,8 +271,8 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   }
 
   const unlockChapter = async (bookId: string, chapterNum: number): Promise<boolean> => {
-    // Chapters 1-19 are free, only 20+ require credits
-    if (chapterNum < 20) {
+    // Chapters 1-5 are free, only 6+ require credits
+    if (chapterNum < 6) {
       return true
     }
 
@@ -333,8 +333,8 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   }
 
   const isChapterUnlocked = (bookId: string, chapterNum: number): boolean => {
-    // Chapters 1-19 are always unlocked
-    if (chapterNum < 20) {
+    // Chapters 1-5 are always unlocked
+    if (chapterNum < 6) {
       return true
     }
 

@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import React from "react"
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, useWindowDimensions, Image } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, useWindowDimensions, Image, Animated } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
@@ -56,7 +56,29 @@ export default function ReaderScreen() {
   const [chapter, setChapter] = useState<Chapter | null>(null)
   const [totalChapters, setTotalChapters] = useState(30)
   const [isLoadingChapter, setIsLoadingChapter] = useState(true)
-  const isWebBlocked = isWeb && currentChapter >= 2
+  const isWebBlocked = isWeb && currentChapter >= 6
+  
+  // Shine animation for download button
+  const shineAnim = useRef(new Animated.Value(-1)).current
+  
+  useEffect(() => {
+    const shineAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(shineAnim, {
+          toValue: 1,
+          duration: 2000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shineAnim, {
+          toValue: -1,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    )
+    shineAnimation.start()
+    return () => shineAnimation.stop()
+  }, [shineAnim])
 
   // Load chapter data from Supabase - only depend on bookId and currentChapter
   useEffect(() => {
@@ -129,7 +151,7 @@ export default function ReaderScreen() {
     )
   }
 
-  const isLocked = !isWebBlocked && bookId ? currentChapter >= 20 && !isChapterUnlocked(bookId, currentChapter) : false
+  const isLocked = !isWebBlocked && bookId ? currentChapter >= 6 && !isChapterUnlocked(bookId, currentChapter) : false
   const canGoNext = currentChapter < totalChapters
   const canGoPrev = currentChapter > 1
 
@@ -143,8 +165,8 @@ export default function ReaderScreen() {
     if (!bookId) return
     const nextChapter = currentChapter + 1
 
-    // Check if next chapter is locked (20+)
-    if (nextChapter >= 20 && !isChapterUnlocked(bookId, nextChapter)) {
+    // Check if next chapter is locked (6+)
+    if (nextChapter >= 6 && !isChapterUnlocked(bookId, nextChapter)) {
       setPendingChapter(nextChapter)
       setShowPaywall(true)
       return
@@ -193,7 +215,7 @@ export default function ReaderScreen() {
           <Ionicons name="phone-portrait-outline" size={64} color={theme.primary} />
           <Text style={[styles.lockedTitle, { color: theme.text }]}>Continue on the App</Text>
           <Text style={[styles.lockedText, { color: theme.textSecondary }]}>
-            Chapters 2 and above are available in the mobile app. Open the app to keep reading.
+            Chapters 6 and above are available in the mobile app. Open the app to keep reading.
           </Text>
           <Pressable 
             style={[styles.unlockButton, { backgroundColor: theme.primary }]} 
@@ -266,6 +288,21 @@ export default function ReaderScreen() {
           style={styles.bannerDownloadButton}
           onPress={handleContinueOnApp}
         >
+          <Animated.View
+            style={[
+              styles.shineOverlay,
+              {
+                transform: [
+                  {
+                    translateX: shineAnim.interpolate({
+                      inputRange: [-1, 1],
+                      outputRange: [-200, 200],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          />
           <Text style={styles.bannerDownloadButtonText}>Download</Text>
         </Pressable>
       </View>
@@ -350,12 +387,14 @@ export default function ReaderScreen() {
 
       {/* Persistent floating Download button */}
       {windowDimensions.width >= 640 && (
-        <Pressable 
-          style={styles.floatingDownloadButton}
-          onPress={handleContinueOnApp}
-        >
-          <Text style={styles.floatingDownloadButtonText}>Download the Book</Text>
-        </Pressable>
+        <View style={[styles.floatingDownloadButtonContainer, { width: windowDimensions.width }]}>
+          <Pressable 
+            style={styles.floatingDownloadButton}
+            onPress={handleContinueOnApp}
+          >
+            <Text style={styles.floatingDownloadButtonText}>Download the Book</Text>
+          </Pressable>
+        </View>
       )}
 
       <Modal visible={showPaywall} transparent animationType="fade">
@@ -565,20 +604,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  floatingDownloadButton: {
+  floatingDownloadButtonContainer: {
     position: "absolute",
     bottom: 90,
-    right: 20,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 1000,
+    pointerEvents: "box-none",
+  },
+  floatingDownloadButton: {
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 20,
-    backgroundColor: "#E66733",
+    backgroundColor: "#FFD700",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
-    zIndex: 1000,
+    minWidth: 200,
+    alignItems: "center",
   },
   floatingDownloadButtonText: {
     fontSize: 14,
@@ -589,7 +635,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#E66733",
+    backgroundColor: "#FFD700",
     paddingHorizontal: 16,
     paddingVertical: 12,
     gap: 12,
@@ -601,8 +647,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bannerIcon: {
-    width: 24,
-    height: 24,
+    width: 48,
+    height: 48,
     resizeMode: "contain",
   },
   bannerTextContainer: {
@@ -623,11 +669,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    overflow: "hidden",
+    position: "relative",
+  },
+  shineOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    transform: [{ skewX: "-20deg" }],
   },
   bannerDownloadButtonText: {
     color: "#fff",
     fontSize: 14,
     fontWeight: "600",
+    zIndex: 1,
   },
   continueSection: {
     alignItems: "center",
