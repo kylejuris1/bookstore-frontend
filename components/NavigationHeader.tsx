@@ -90,7 +90,7 @@ export default function NavigationHeader() {
       >
         <Ionicons 
           name="compass" 
-          size={20} 
+          size={16} 
           color={currentRoute === "index" ? theme.primary : theme.textSecondary} 
         />
         <Text style={[
@@ -107,7 +107,7 @@ export default function NavigationHeader() {
       >
         <Ionicons 
           name="book" 
-          size={20} 
+          size={16} 
           color={currentRoute === "library" ? theme.primary : theme.textSecondary} 
         />
         <Text style={[
@@ -124,7 +124,7 @@ export default function NavigationHeader() {
       >
         <Ionicons 
           name="trophy" 
-          size={20} 
+          size={16} 
           color={currentRoute === "rank" ? theme.primary : theme.textSecondary} 
         />
         <Text style={[
@@ -141,7 +141,7 @@ export default function NavigationHeader() {
       >
         <Ionicons 
           name="person-circle" 
-          size={20} 
+          size={16} 
           color={currentRoute === "profile" ? theme.primary : theme.textSecondary} 
         />
         <Text style={[
@@ -160,7 +160,7 @@ export default function NavigationHeader() {
           style={styles.hamburgerButton}
           onPress={() => setShowSidePanel(true)}
         >
-          <Ionicons name="menu" size={24} color={theme.text} />
+          <Ionicons name="menu" size={18} color={theme.text} />
         </Pressable>
         
         {/* Navigation buttons - show in header if space available, otherwise in side panel */}
@@ -173,7 +173,7 @@ export default function NavigationHeader() {
         <View style={styles.headerRight}>
           {/* Search bar - always visible on the right */}
           <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
-            <Ionicons name="search" size={18} color={theme.textSecondary} />
+            <Ionicons name="search" size={14} color={theme.textSecondary} />
           </View>
           
           {windowDimensions.width >= 1024 && (
@@ -190,7 +190,7 @@ export default function NavigationHeader() {
             </Pressable>
           )}
           <View style={[styles.creditsContainer, { backgroundColor: theme.card }]}>
-            <Ionicons name="star" size={20} color={theme.primary} />
+            <Ionicons name="star" size={16} color={theme.primary} />
             <Text style={[styles.credits, { color: theme.primary }]}>{credits}</Text>
           </View>
         </View>
@@ -271,12 +271,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 4.5,
+    paddingVertical: 2.25,
     flexWrap: "nowrap",
-    gap: 12,
+    gap: 6,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(0,0,0,0.1)",
-    minHeight: 18,
+    minHeight: 9,
   },
   titleContainer: {
     flexDirection: "row",
@@ -331,17 +331,17 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    minWidth: 150,
-    maxWidth: 250,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    minWidth: 120,
+    maxWidth: 200,
     flex: 0,
-    marginHorizontal: 8,
+    marginHorizontal: 4,
   },
   hamburgerButton: {
-    padding: 8,
-    marginLeft: 8,
+    padding: 4,
+    marginLeft: 4,
   },
   sidePanelOverlay: {
     position: "absolute",
@@ -427,19 +427,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 12,
-  },
-  sidePanelDownloadButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    alignItems: "center",
-    marginTop: 16,
-    marginBottom: 20,
-  },
-  sidePanelDownloadButtonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "600",
   },
   topUpButton: {
     paddingHorizontal: 12,

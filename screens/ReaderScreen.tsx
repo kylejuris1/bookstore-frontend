@@ -236,19 +236,42 @@ export default function ReaderScreen() {
     }
 
     return (
-      <>
+      <View style={styles.chapterContentWrapper}>
         <Text style={[styles.chapterTitle, { color: theme.primary }]}>{chapter.chapter_title || `Chapter ${currentChapter}`}</Text>
-        <Text style={[
-          styles.chapterContent, 
-          { 
-            fontSize: settings.fontSize || 16, 
-            lineHeight: (settings.fontSize || 16) * 1.625,
-            color: theme.text
-          }
-        ]}>
-          {chapter.chapter_content}
-        </Text>
-      </>
+        <View style={styles.chapterTextContainer}>
+          <Text style={[
+            styles.chapterContent, 
+            { 
+              fontSize: settings.fontSize || 16, 
+              lineHeight: (settings.fontSize || 16) * 1.625,
+              color: theme.text
+            }
+          ]}>
+            {chapter.chapter_content}
+          </Text>
+          {/* Fade gradient overlay */}
+          {Platform.OS === "web" ? (
+            <View 
+              style={[
+                styles.textFadeOverlay,
+                {
+                  // @ts-ignore - web-specific style
+                  background: `linear-gradient(to bottom, transparent 0%, ${theme.background} 100%)`,
+                }
+              ]} 
+              pointerEvents="none" 
+            />
+          ) : (
+            <View 
+              style={[
+                styles.textFadeOverlay,
+                { backgroundColor: theme.background, opacity: 0.95 }
+              ]} 
+              pointerEvents="none" 
+            />
+          )}
+        </View>
+      </View>
     )
   }
 
@@ -256,44 +279,43 @@ export default function ReaderScreen() {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <PromotionalBanner />
       <NavigationHeader />
-      {/* Fixed header with book title and back button */}
-      <View style={[styles.fixedHeader, { borderBottomColor: theme.border, backgroundColor: theme.background, paddingHorizontal: horizontalPadding }]}>
-        <Pressable onPress={() => {
-          if (bookId) {
-            router.push({ pathname: "/book/[bookId]", params: { bookId } })
-          } else {
-            router.push("/(tabs)")
-          }
-        }}>
-          <Ionicons name="chevron-back" size={20} color={theme.primary} />
-        </Pressable>
-        <Pressable
-          style={{ flex: 1 }}
-          onPress={() => {
+      <ScrollView style={[styles.content, { paddingHorizontal: horizontalPadding }]} showsVerticalScrollIndicator={false}>
+        {/* Header with book title and back button - scrolls with content */}
+        <View style={[styles.header, { borderBottomColor: theme.border, paddingHorizontal: horizontalPadding, marginHorizontal: -horizontalPadding }]}>
+          <Pressable onPress={() => {
             if (bookId) {
               router.push({ pathname: "/book/[bookId]", params: { bookId } })
+            } else {
+              router.push("/(tabs)")
             }
-          }}
-        >
-          <Text style={[styles.headerTitle, { color: theme.text }]} numberOfLines={1}>
-            {book.title}
-          </Text>
-        </Pressable>
-        <View style={{ width: 28 }} />
-      </View>
-
-      <ScrollView style={[styles.content, { paddingHorizontal: horizontalPadding, paddingTop: 60 }]} showsVerticalScrollIndicator={false}>
+          }}>
+            <Ionicons name="chevron-back" size={20} color={theme.primary} />
+          </Pressable>
+          <Pressable
+            style={{ flex: 1 }}
+            onPress={() => {
+              if (bookId) {
+                router.push({ pathname: "/book/[bookId]", params: { bookId } })
+              }
+            }}
+          >
+            <Text style={[styles.headerTitle, { color: theme.text }]} numberOfLines={1}>
+              {book.title}
+            </Text>
+          </Pressable>
+          <View style={{ width: 28 }} />
+        </View>
         {renderContent()}
         {!isLoadingChapter && !isWebBlocked && chapter && !isLocked && (
           <View style={styles.continueSection}>
-            <Text style={[styles.continueQuestion, { color: theme.text }]}>Want to know what happens next?</Text>
-            <Pressable 
-              style={styles.continueButton}
-              onPress={handleContinueOnApp}
-            >
-              <Text style={styles.continueButtonText}>Continue Reading</Text>
-            </Pressable>
-          </View>
+              <Text style={[styles.continueQuestion, { color: theme.text }]}>Want to know what happens next?</Text>
+              <Pressable 
+                style={styles.continueButton}
+                onPress={handleContinueOnApp}
+              >
+                <Text style={styles.continueButtonText}>Continue Reading</Text>
+              </Pressable>
+            </View>
         )}
         
         {/* Chapter Navigation Buttons */}
@@ -332,17 +354,17 @@ export default function ReaderScreen() {
             </Pressable>
           </View>
         )}
-        
-        {/* Download the Book button in reader area */}
-        <View style={styles.readerDownloadSection}>
-          <Pressable 
-            style={styles.readerDownloadButton}
-            onPress={handleContinueOnApp}
-          >
-            <Text style={styles.readerDownloadButtonText}>Download the Book</Text>
-          </Pressable>
-        </View>
       </ScrollView>
+
+      {/* Floating Download the Book button */}
+      <View style={styles.floatingDownloadButtonContainer}>
+        <Pressable 
+          style={styles.floatingDownloadButton}
+          onPress={handleContinueOnApp}
+        >
+          <Text style={styles.floatingDownloadButtonText}>Download the Book</Text>
+        </Pressable>
+      </View>
 
       <Modal visible={showPaywall} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -391,25 +413,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  fixedHeader: {
-    position: "absolute",
-    top: 18,
-    left: 0,
-    right: 0,
-    zIndex: 100,
+  header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    backgroundColor: "inherit",
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 3,
-    borderBottomWidth: 1,
+    marginTop: 8,
   },
   headerTitle: {
     flex: 1,
@@ -421,6 +431,12 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 24,
   },
+  chapterContentWrapper: {
+    position: "relative",
+  },
+  chapterTextContainer: {
+    position: "relative",
+  },
   chapterTitle: {
     fontSize: 24,
     fontWeight: "700",
@@ -430,6 +446,14 @@ const styles = StyleSheet.create({
     fontSize: 16, // Default, will be overridden
     lineHeight: 26,
     fontFamily: "System",
+    paddingBottom: 80,
+  },
+  textFadeOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 100,
   },
   lockedContainer: {
     flex: 1,
@@ -564,25 +588,29 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  readerDownloadSection: {
+  floatingDownloadButtonContainer: {
+    position: "absolute",
+    bottom: 20,
+    left: 0,
+    right: 0,
     alignItems: "center",
-    paddingVertical: 24,
-    marginTop: 20,
+    zIndex: 1000,
+    pointerEvents: "box-none",
   },
-  readerDownloadButton: {
+  floatingDownloadButton: {
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 20,
-    backgroundColor: "#FFD700",
+    backgroundColor: "#ffc566",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 8,
     minWidth: 200,
     alignItems: "center",
   },
-  readerDownloadButtonText: {
+  floatingDownloadButtonText: {
     fontSize: 16,
     fontWeight: "600",
     color: "#000",
