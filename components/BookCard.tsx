@@ -121,14 +121,14 @@ export default function BookCard({ book, onPress, rank }: BookCardProps) {
                 color={isBookmarkedValue ? "#fff" : theme.primary}
               />
               {showBookmarkText && (
-                <Text
-                  style={[
-                    styles.bookmarkText,
-                    { color: isBookmarkedValue ? "#fff" : theme.primary },
-                  ]}
-                >
-                  {isBookmarkedValue ? "Bookmarked" : "Bookmark"}
-                </Text>
+              <Text
+                style={[
+                  styles.bookmarkText,
+                  { color: isBookmarkedValue ? "#fff" : theme.primary },
+                ]}
+              >
+                {isBookmarkedValue ? "Bookmarked" : "Bookmark"}
+              </Text>
               )}
             </Pressable>
           </View>
