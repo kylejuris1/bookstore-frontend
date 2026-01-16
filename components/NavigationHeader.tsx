@@ -16,6 +16,7 @@ export default function NavigationHeader() {
   const isWeb = Platform.OS === "web"
   
   const currentRoute = segments[segments.length - 1] || "index"
+  const isReaderScreen = segments.includes("reader")
   
   // Calculate responsive padding with smooth transitions
   const horizontalPadding = React.useMemo(() => {
@@ -40,13 +41,20 @@ export default function NavigationHeader() {
 
   return (
     <View style={[styles.header, { paddingHorizontal: horizontalPadding, backgroundColor: theme.background }]}>
-      <Pressable onPress={() => router.push("/(tabs)")} style={styles.titleContainer}>
-        <Ionicons name="book" size={24} color={theme.primary} />
-        <Text style={[styles.titleBase]}>
-          <Text style={[styles.titleNext, { color: theme.text }]}>Next</Text>
-          <Text style={[styles.titlePage, { color: theme.text }]}>Page</Text>
-        </Text>
-      </Pressable>
+      {!isReaderScreen && (
+        <Pressable onPress={() => router.push("/(tabs)")} style={styles.titleContainer}>
+          <Ionicons name="book" size={24} color={theme.primary} />
+          <Text style={[styles.titleBase]}>
+            <Text style={[styles.titleNext, { color: theme.text }]}>Next</Text>
+            <Text style={[styles.titlePage, { color: theme.text }]}>Page</Text>
+          </Text>
+        </Pressable>
+      )}
+      {isReaderScreen && windowDimensions.width >= 768 && (
+        <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
+          <Ionicons name="search" size={18} color={theme.textSecondary} />
+        </View>
+      )}
         <View style={styles.headerNav}>
         <Pressable
           style={styles.navButton}
@@ -114,7 +122,7 @@ export default function NavigationHeader() {
         </Pressable>
       </View>
       <View style={styles.headerRight}>
-        {windowDimensions.width >= 768 && (
+        {!isReaderScreen && windowDimensions.width >= 768 && (
           <View style={[
             styles.searchContainer, 
             { backgroundColor: currentRoute === "index" ? theme.card : "transparent" },

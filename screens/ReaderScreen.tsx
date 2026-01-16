@@ -281,7 +281,28 @@ export default function ReaderScreen() {
 
       <ScrollView style={[styles.content, { paddingHorizontal: horizontalPadding }]} showsVerticalScrollIndicator={false}>
         {renderContent()}
+        {!isLoadingChapter && !isWebBlocked && chapter && !isLocked && (
+          <View style={styles.continueSection}>
+            <Text style={[styles.continueQuestion, { color: theme.text }]}>Want to know what happens next?</Text>
+            <Pressable 
+              style={styles.continueButton}
+              onPress={handleContinueOnApp}
+            >
+              <Text style={styles.continueButtonText}>Continue Reading</Text>
+            </Pressable>
+          </View>
+        )}
       </ScrollView>
+
+      {/* Persistent floating Download button */}
+      {windowDimensions.width >= 640 && (
+        <Pressable 
+          style={[styles.floatingDownloadButton, { backgroundColor: theme.card }]}
+          onPress={handleContinueOnApp}
+        >
+          <Text style={[styles.floatingDownloadButtonText, { color: theme.text }]}>Download the Book</Text>
+        </Pressable>
+      )}
 
       <View style={[styles.footer, { borderTopColor: theme.border, paddingHorizontal: horizontalPadding }]}>
         <Pressable
@@ -372,7 +393,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 12,
+    paddingVertical: 6,
     borderBottomWidth: 1,
   },
   headerTitle: {
@@ -533,5 +554,47 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  floatingDownloadButton: {
+    position: "absolute",
+    bottom: 90,
+    right: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  floatingDownloadButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  continueSection: {
+    alignItems: "center",
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+  },
+  continueQuestion: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  continueButton: {
+    backgroundColor: "#FF69B4",
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 8,
+    minWidth: 200,
+    alignItems: "center",
+  },
+  continueButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 })
