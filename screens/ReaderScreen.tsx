@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import React from "react"
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, useWindowDimensions } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, useWindowDimensions, Image } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
@@ -256,7 +256,7 @@ export default function ReaderScreen() {
       {/* Promotional Banner */}
       <View style={styles.promotionalBanner}>
         <View style={styles.bannerLeft}>
-          <Ionicons name="book" size={24} color="#FF4500" />
+          <Image source={require("../assets/icon.png")} style={styles.bannerIcon} />
           <View style={styles.bannerTextContainer}>
             <Text style={styles.bannerTitle}>NextPage</Text>
             <Text style={styles.bannerSubtitle}>Download the book for free</Text>
@@ -309,6 +309,43 @@ export default function ReaderScreen() {
             </Pressable>
           </View>
         )}
+        
+        {/* Chapter Navigation Buttons */}
+        {!isLoadingChapter && !isWebBlocked && chapter && !isLocked && (
+          <View style={[styles.chapterNavigation, { paddingHorizontal: horizontalPadding }]}>
+            <Pressable
+              style={[
+                styles.navButton, 
+                { backgroundColor: theme.card },
+                !canGoPrev && styles.navButtonDisabled
+              ]}
+              onPress={handlePreviousChapter}
+              disabled={!canGoPrev}
+            >
+              <Ionicons name="chevron-back" size={20} color={!canGoPrev ? theme.textSecondary : theme.primary} />
+              <Text style={[
+                styles.navButtonText, 
+                { color: !canGoPrev ? theme.textSecondary : theme.primary }
+              ]}>Previous Chapter</Text>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.navButton, 
+                { backgroundColor: theme.card },
+                !canGoNext && styles.navButtonDisabled
+              ]}
+              onPress={handleNextChapter}
+              disabled={!canGoNext}
+            >
+              <Text style={[
+                styles.navButtonText, 
+                { color: !canGoNext ? theme.textSecondary : theme.primary }
+              ]}>Next Chapter</Text>
+              <Ionicons name="chevron-forward" size={20} color={!canGoNext ? theme.textSecondary : theme.primary} />
+            </Pressable>
+          </View>
+        )}
       </ScrollView>
 
       {/* Persistent floating Download button */}
@@ -320,44 +357,6 @@ export default function ReaderScreen() {
           <Text style={styles.floatingDownloadButtonText}>Download the Book</Text>
         </Pressable>
       )}
-
-      <View style={[styles.footer, { borderTopColor: theme.border, paddingHorizontal: horizontalPadding }]}>
-        <Pressable
-          style={[
-            styles.navButton, 
-            { backgroundColor: theme.card },
-            !canGoPrev && styles.navButtonDisabled
-          ]}
-          onPress={handlePreviousChapter}
-          disabled={!canGoPrev}
-        >
-          <Ionicons name="chevron-back" size={20} color={!canGoPrev ? theme.textSecondary : theme.primary} />
-          <Text style={[
-            styles.navButtonText, 
-            { color: !canGoPrev ? theme.textSecondary : theme.primary }
-          ]}>Previous</Text>
-        </Pressable>
-
-        <Text style={[styles.pageIndicator, { color: theme.textSecondary }]}>
-          Chapter {currentChapter} {bookId && currentChapter >= 20 && !isChapterUnlocked(bookId, currentChapter) && "🔒"}
-        </Text>
-
-        <Pressable
-          style={[
-            styles.navButton, 
-            { backgroundColor: theme.card },
-            !canGoNext && styles.navButtonDisabled
-          ]}
-          onPress={handleNextChapter}
-          disabled={!canGoNext}
-        >
-          <Text style={[
-            styles.navButtonText, 
-            { color: !canGoNext ? theme.textSecondary : theme.primary }
-          ]}>Next</Text>
-          <Ionicons name="chevron-forward" size={20} color={!canGoNext ? theme.textSecondary : theme.primary} />
-        </Pressable>
-      </View>
 
       <Modal visible={showPaywall} transparent animationType="fade">
         <View style={styles.modalOverlay}>
@@ -477,13 +476,13 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 16,
   },
-  footer: {
+  chapterNavigation: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 16,
-    borderTopWidth: 1,
+    paddingVertical: 24,
     gap: 12,
+    marginTop: 20,
   },
   navButton: {
     flex: 1,
@@ -500,12 +499,6 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: 14,
     fontWeight: "600",
-  },
-  pageIndicator: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 14,
-    fontWeight: "500",
   },
   modalOverlay: {
     flex: 1,
@@ -579,7 +572,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 20,
-    backgroundColor: "#FFA500",
+    backgroundColor: "#E66733",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -596,7 +589,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#FFA500",
+    backgroundColor: "#E66733",
     paddingHorizontal: 16,
     paddingVertical: 12,
     gap: 12,
@@ -606,6 +599,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     flex: 1,
+  },
+  bannerIcon: {
+    width: 24,
+    height: 24,
+    resizeMode: "contain",
   },
   bannerTextContainer: {
     flexDirection: "column",
