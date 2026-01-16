@@ -253,6 +253,23 @@ export default function ReaderScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+      {/* Promotional Banner */}
+      <View style={styles.promotionalBanner}>
+        <View style={styles.bannerLeft}>
+          <Ionicons name="book" size={24} color="#FF4500" />
+          <View style={styles.bannerTextContainer}>
+            <Text style={styles.bannerTitle}>NextPage</Text>
+            <Text style={styles.bannerSubtitle}>Download the book for free</Text>
+          </View>
+        </View>
+        <Pressable 
+          style={styles.bannerDownloadButton}
+          onPress={handleContinueOnApp}
+        >
+          <Text style={styles.bannerDownloadButtonText}>Download</Text>
+        </Pressable>
+      </View>
+      
       <NavigationHeader />
       <View style={[styles.header, { borderBottomColor: theme.border, paddingHorizontal: horizontalPadding }]}>
         <Pressable onPress={() => {
@@ -262,7 +279,7 @@ export default function ReaderScreen() {
             router.push("/(tabs)")
           }
         }}>
-          <Ionicons name="chevron-back" size={28} color={theme.primary} />
+          <Ionicons name="chevron-back" size={20} color={theme.primary} />
         </Pressable>
         <Pressable
           style={{ flex: 1 }}
@@ -297,10 +314,10 @@ export default function ReaderScreen() {
       {/* Persistent floating Download button */}
       {windowDimensions.width >= 640 && (
         <Pressable 
-          style={[styles.floatingDownloadButton, { backgroundColor: theme.card }]}
+          style={styles.floatingDownloadButton}
           onPress={handleContinueOnApp}
         >
-          <Text style={[styles.floatingDownloadButtonText, { color: theme.text }]}>Download the Book</Text>
+          <Text style={styles.floatingDownloadButtonText}>Download the Book</Text>
         </Pressable>
       )}
 
@@ -393,13 +410,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 6,
+    paddingVertical: 3,
     borderBottomWidth: 1,
   },
   headerTitle: {
     flex: 1,
     textAlign: "center",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
   },
   content: {
@@ -562,6 +579,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 20,
+    backgroundColor: "#FFA500",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -570,6 +588,46 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   floatingDownloadButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#000",
+  },
+  promotionalBanner: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "#FFA500",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
+  },
+  bannerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    flex: 1,
+  },
+  bannerTextContainer: {
+    flexDirection: "column",
+    gap: 2,
+  },
+  bannerTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#000",
+  },
+  bannerSubtitle: {
+    fontSize: 12,
+    color: "#000",
+  },
+  bannerDownloadButton: {
+    backgroundColor: "#000",
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  bannerDownloadButtonText: {
+    color: "#fff",
     fontSize: 14,
     fontWeight: "600",
   },
