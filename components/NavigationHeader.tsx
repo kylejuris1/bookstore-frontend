@@ -185,8 +185,12 @@ export default function NavigationHeader() {
           </View>
         )}
         
+        {/* Spacer to push right items to the right */}
+        <View style={{ flex: 1 }} />
+        
+        {/* Right side: Search bar and Credits counter */}
         <View style={styles.headerRight}>
-          {/* Search bar - always visible on the right */}
+          {/* Search bar - to the left of credits */}
           <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
             <Ionicons name="search" size={14} color={theme.textSecondary} />
             <TextInput
@@ -210,19 +214,7 @@ export default function NavigationHeader() {
             />
           </View>
           
-          {windowDimensions.width >= 1024 && (
-            <Pressable 
-              style={[styles.topUpButton, { backgroundColor: theme.primary }]} 
-              onPress={() => {
-                if (isWeb) {
-                  Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
-                  return
-                }
-              }}
-            >
-              <Text style={styles.topUpButtonText}>Continue Reading for FREE</Text>
-            </Pressable>
-          )}
+          {/* Credits counter - always on the very right */}
           <View style={[styles.creditsContainer, { backgroundColor: theme.card }]}>
             <Ionicons name="star" size={16} color={theme.primary} />
             <Text style={[styles.credits, { color: theme.primary }]}>{credits}</Text>
