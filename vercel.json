@@ -1,12 +1,7 @@
-{
+﻿{
   "buildCommand": "npm run web:export",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
-  ],
-  "functions": {
-    "**": {
-      "maxDuration": 300
-    }
-  }
+  ]
 }
