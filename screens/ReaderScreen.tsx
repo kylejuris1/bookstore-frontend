@@ -495,14 +495,14 @@ const styles = StyleSheet.create({
     fontSize: 16, // Default, will be overridden
     lineHeight: 26,
     fontFamily: "System",
-    paddingBottom: 120, // Increased to match fade overlay height
+    paddingBottom: 0, // Removed padding - fade overlay handles the visual fade
   },
   textFadeOverlay: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 120, // Increased height for more visible fade
+    height: 60, // Reduced height for fade effect without excessive spacing
   },
   lockedContainer: {
     flex: 1,
