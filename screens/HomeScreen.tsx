@@ -44,7 +44,7 @@ export default function HomeScreen() {
   const isWeb = Platform.OS === "web"
   const [resizeKey, setResizeKey] = useState(0)
   
-  // Force re-render on window resize for web
+  // Force re-render on window resize for web - skip during build
   useEffect(() => {
     if (!isWeb || typeof window === 'undefined') return
     

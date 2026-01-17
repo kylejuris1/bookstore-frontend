@@ -28,8 +28,21 @@ export default function NavigationHeader() {
   // Side panel slide animation
   const slideAnim = React.useRef(new Animated.Value(-280)).current
   
-  // Fetch all unique tags
+  // Fetch all unique tags - skip during static export/build
   useEffect(() => {
+    // Skip API calls during build/static export
+    // Check if we're in a build environment (no window or SSR)
+    if (typeof window === 'undefined') {
+      setIsLoadingTags(false)
+      return
+    }
+    
+    // Only fetch tags in browser environment
+    if (!isWeb) {
+      setIsLoadingTags(false)
+      return
+    }
+    
     const loadTags = async () => {
       try {
         setIsLoadingTags(true)
@@ -47,7 +60,7 @@ export default function NavigationHeader() {
       }
     }
     loadTags()
-  }, [])
+  }, [isWeb])
   
   // Animate side panel
   useEffect(() => {
