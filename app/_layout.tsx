@@ -5,6 +5,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { LibraryProvider } from "../context/LibraryContext";
 import { AuthProvider } from "../context/AuthContext";
 import { ThemeProvider } from "../context/ThemeContext";
+import { SearchProvider } from "../context/SearchContext";
 
 export default function RootLayout() {
   useEffect(() => {
@@ -28,14 +29,16 @@ export default function RootLayout() {
   return (
     <AuthProvider>
       <LibraryProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="reader" />
-        </Stack>
+        <SearchProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="reader" />
+          </Stack>
+        </SearchProvider>
       </LibraryProvider>
     </AuthProvider>
   );

@@ -7,6 +7,7 @@ import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "expo-router"
 import { fetchBook } from "../lib/api"
 import NavigationHeader from "../components/NavigationHeader"
+import PromotionalBanner from "../components/PromotionalBanner"
 
 const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
 
@@ -165,6 +166,7 @@ export default function SettingsScreen() {
 
   return (
     <SafeAreaView style={[styles.container, dynamicStyles.container]}>
+      <PromotionalBanner />
       <NavigationHeader />
       <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
         <Text style={[styles.title, { color: theme.text }]}>Settings</Text>

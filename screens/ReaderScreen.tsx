@@ -253,10 +253,12 @@ export default function ReaderScreen() {
           <View 
             style={[
               styles.textFadeOverlay,
-              { backgroundColor: theme.background },
-              Platform.OS === "web" && {
+              Platform.OS === "web" ? {
                 // @ts-ignore - web-specific style
-                backgroundImage: `linear-gradient(to bottom, rgba(0,0,0,0) 0%, ${theme.background} 100%)`,
+                backgroundImage: `linear-gradient(to bottom, transparent 0%, ${theme.background} 50%, ${theme.background} 100%)`,
+              } : {
+                backgroundColor: theme.background,
+                opacity: 0.98,
               }
             ]} 
             pointerEvents="none" 
@@ -339,9 +341,9 @@ export default function ReaderScreen() {
             >
               <Text style={[
                 styles.navButtonText, 
-                { color: !canGoNext ? theme.textSecondary : theme.primary }
+                { color: !canGoNext ? theme.textSecondary : "#FFB6C1" } // Lighter pink (#FFB6C1) compared to Continue Reading button (#FF69B4)
               ]}>Next Chapter</Text>
-              <Ionicons name="chevron-forward" size={20} color={!canGoNext ? theme.textSecondary : theme.primary} />
+              <Ionicons name="chevron-forward" size={20} color={!canGoNext ? theme.textSecondary : "#FFB6C1"} />
             </Pressable>
           </View>
         )}
@@ -410,7 +412,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 8,
     borderBottomWidth: 1,
-    marginTop: 8,
+    marginTop: 0, // Reduced from 8 to eliminate gap
   },
   headerTitle: {
     flex: 1,
@@ -420,7 +422,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingVertical: 24,
+    paddingVertical: 12, // Reduced from 24 to bring content closer to header
   },
   chapterContentWrapper: {
     position: "relative",
@@ -431,20 +433,21 @@ const styles = StyleSheet.create({
   chapterTitle: {
     fontSize: 24,
     fontWeight: "700",
-    marginBottom: 16,
+    marginTop: 8, // Added small top margin
+    marginBottom: 12, // Reduced from 16 to bring title closer to content
   },
   chapterContent: {
     fontSize: 16, // Default, will be overridden
     lineHeight: 26,
     fontFamily: "System",
-    paddingBottom: 80,
+    paddingBottom: 120, // Increased to match fade overlay height
   },
   textFadeOverlay: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    height: 100,
+    height: 120, // Increased height for more visible fade
   },
   lockedContainer: {
     flex: 1,
@@ -504,8 +507,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 10,
+    paddingHorizontal: 8,
     borderRadius: 8,
     gap: 6,
+    minWidth: 0, // Allow button to shrink
   },
   navButtonDisabled: {
     opacity: 0.5,
@@ -513,6 +518,7 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: 14,
     fontWeight: "600",
+    flexShrink: 1, // Allow text to shrink if needed
   },
   modalOverlay: {
     flex: 1,
@@ -581,7 +587,7 @@ const styles = StyleSheet.create({
   },
   floatingDownloadButtonContainer: {
     position: "absolute",
-    bottom: 20,
+    bottom: 44, // Moved 20% higher (from 20 to 44)
     left: 0,
     right: 0,
     alignItems: "center",
@@ -608,7 +614,8 @@ const styles = StyleSheet.create({
   },
   continueSection: {
     alignItems: "center",
-    paddingVertical: 40,
+    paddingTop: 16, // Reduced top padding from 40 to 16
+    paddingBottom: 20, // Reduced bottom padding
     paddingHorizontal: 20,
   },
   continueQuestion: {

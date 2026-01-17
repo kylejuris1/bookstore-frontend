@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from "react"
-import { View, Text, StyleSheet, Pressable, useWindowDimensions, Platform, Linking, Modal, Animated, ScrollView } from "react-native"
+import { View, Text, StyleSheet, Pressable, useWindowDimensions, Platform, Linking, Modal, Animated, ScrollView, TextInput } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useSegments } from "expo-router"
 import { useTheme } from "../context/ThemeContext"
 import { useLibrary } from "../context/LibraryContext"
+import { useSearch } from "../context/SearchContext"
 import { fetchBooks, type Book } from "../lib/api"
 
 const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
@@ -21,6 +22,7 @@ export default function NavigationHeader() {
   const isReaderScreen = segments.includes("reader")
   const [allTags, setAllTags] = useState<string[]>([])
   const [isLoadingTags, setIsLoadingTags] = useState(true)
+  const { searchQuery, setSearchQuery } = useSearch()
   
   // Show hamburger menu when window is too small to fit all nav items
   const showHamburgerMenu = windowDimensions.width < 900
@@ -187,6 +189,25 @@ export default function NavigationHeader() {
           {/* Search bar - always visible on the right */}
           <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
             <Ionicons name="search" size={14} color={theme.textSecondary} />
+            <TextInput
+              style={[styles.searchInput, { color: theme.text }]}
+              placeholder="Search..."
+              placeholderTextColor={theme.textSecondary}
+              value={searchQuery}
+              onChangeText={(text) => {
+                setSearchQuery(text)
+                // Navigate to home with search query if not already there
+                if (currentRoute !== "index") {
+                  router.push("/(tabs)")
+                }
+              }}
+              onSubmitEditing={() => {
+                // Navigate to home to show search results
+                if (currentRoute !== "index") {
+                  router.push("/(tabs)")
+                }
+              }}
+            />
           </View>
           
           {windowDimensions.width >= 1024 && (
@@ -351,6 +372,14 @@ const styles = StyleSheet.create({
     maxWidth: 200,
     flex: 0,
     marginHorizontal: 4,
+    gap: 6,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 13,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
+    minWidth: 0,
   },
   hamburgerButton: {
     padding: 4,

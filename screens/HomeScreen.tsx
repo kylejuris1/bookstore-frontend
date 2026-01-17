@@ -21,10 +21,12 @@ import { useRouter, useSegments } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
 import { useAuth } from "../context/AuthContext"
 import { useTheme } from "../context/ThemeContext"
+import { useSearch } from "../context/SearchContext"
 import BookCard, { formatViews } from "../components/BookCard"
 import { fetchBooks, type Book } from "../lib/api"
 import Footer from "../components/Footer"
 import PromotionalBanner from "../components/PromotionalBanner"
+import NavigationHeader from "../components/NavigationHeader"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
 const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
@@ -38,7 +40,7 @@ export default function HomeScreen() {
   const windowDimensions = useWindowDimensions()
   
   const currentRoute = segments[segments.length - 1] || "index"
-  const [searchQuery, setSearchQuery] = useState("")
+  const { searchQuery } = useSearch()
   const { credits, isLoading: libraryLoading } = useLibrary()
   const [books, setBooks] = useState<Book[]>([])
   const [isLoadingBooks, setIsLoadingBooks] = useState(true)
@@ -250,109 +252,7 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <PromotionalBanner />
-      <View style={[styles.header, { paddingHorizontal: horizontalPadding }]}>
-        <Pressable onPress={() => router.push("/(tabs)")} style={styles.titleContainer}>
-          <Ionicons name="book" size={24} color={theme.primary} />
-          <Text style={[styles.titleBase]}>
-            <Text style={[styles.titleNext, { color: theme.text }]}>Next</Text>
-            <Text style={[styles.titlePage, { color: theme.text }]}>Page</Text>
-          </Text>
-        </Pressable>
-        <View style={styles.headerNav}>
-          <Pressable
-            style={styles.navButton}
-            onPress={() => router.push("/(tabs)")}
-          >
-            <Ionicons 
-              name="compass" 
-              size={20} 
-              color={currentRoute === "index" ? theme.primary : theme.textSecondary} 
-            />
-            {windowDimensions.width >= 900 && (
-            <Text style={[
-              styles.navButtonText,
-              { color: currentRoute === "index" ? theme.primary : theme.textSecondary }
-            ]}>Discover</Text>
-            )}
-          </Pressable>
-          <Pressable
-            style={styles.navButton}
-            onPress={() => router.push("/(tabs)/library")}
-          >
-            <Ionicons 
-              name="book" 
-              size={20} 
-              color={currentRoute === "library" ? theme.primary : theme.textSecondary} 
-            />
-            {windowDimensions.width >= 900 && (
-            <Text style={[
-              styles.navButtonText,
-              { color: currentRoute === "library" ? theme.primary : theme.textSecondary }
-            ]}>Library</Text>
-            )}
-          </Pressable>
-          <Pressable
-            style={styles.navButton}
-            onPress={() => router.push("/(tabs)/rank")}
-          >
-            <Ionicons 
-              name="trophy" 
-              size={20} 
-              color={currentRoute === "rank" ? theme.primary : theme.textSecondary} 
-            />
-            {windowDimensions.width >= 900 && (
-            <Text style={[
-              styles.navButtonText,
-              { color: currentRoute === "rank" ? theme.primary : theme.textSecondary }
-            ]}>Rank</Text>
-            )}
-          </Pressable>
-          <Pressable
-            style={styles.navButton}
-            onPress={() => router.push("/(tabs)/profile")}
-          >
-            <Ionicons 
-              name="person-circle" 
-              size={20} 
-              color={currentRoute === "profile" ? theme.primary : theme.textSecondary} 
-            />
-            {windowDimensions.width >= 900 && (
-            <Text style={[
-              styles.navButtonText,
-              { color: currentRoute === "profile" ? theme.primary : theme.textSecondary }
-            ]}>Profile</Text>
-            )}
-          </Pressable>
-        </View>
-        <View style={styles.headerRight}>
-          {windowDimensions.width >= 768 && (
-          <View style={[styles.searchContainer, { backgroundColor: theme.card }]}>
-            <Ionicons name="search" size={18} color={theme.textSecondary} />
-            <TextInput
-              style={[styles.searchInput, { color: theme.text }]}
-              placeholder="Search..."
-              placeholderTextColor={theme.textSecondary}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-          )}
-          {windowDimensions.width >= 1024 && (
-          <Pressable 
-            style={[styles.topUpButton, { backgroundColor: theme.primary }]} 
-            onPress={() => {
-                Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
-            }}
-          >
-            <Text style={styles.topUpButtonText}>Continue Reading for FREE</Text>
-          </Pressable>
-          )}
-          <View style={[styles.creditsContainer, { backgroundColor: theme.card }]}>
-            <Ionicons name="star" size={20} color={theme.primary} />
-            <Text style={[styles.credits, { color: theme.primary }]}>{credits}</Text>
-          </View>
-        </View>
-      </View>
+      <NavigationHeader />
 
       <ScrollView showsVerticalScrollIndicator={false} style={[styles.content, { paddingHorizontal: horizontalPadding }]}>
         {topSlides.length > 0 && (
