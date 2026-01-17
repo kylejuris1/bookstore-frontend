@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react"
 import React from "react"
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, useWindowDimensions } from "react-native"
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, Pressable, Modal, Alert, ActivityIndicator, Linking, Platform, useWindowDimensions, Image } from "react-native"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
@@ -355,6 +355,7 @@ export default function ReaderScreen() {
         {renderContent()}
         {!isLoadingChapter && !isWebBlocked && chapter && !isLocked && (
           <View style={styles.continueSection}>
+              <Image source={require("../assets/icon.png")} style={styles.nextPageLogo} />
               <Text style={[styles.continueQuestion, { color: theme.text }]}>Want to know what happens next?</Text>
               <Pressable 
                 style={styles.continueButton}
@@ -552,8 +553,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingVertical: 24,
-    gap: 12,
+    gap: 16, // Increased from 12 to add more space between buttons
     marginTop: 20,
+    paddingBottom: 60, // Added space after buttons for scrolling
   },
   navButton: {
     flex: 1,
@@ -668,9 +670,15 @@ const styles = StyleSheet.create({
   },
   continueSection: {
     alignItems: "center",
-    paddingTop: 16, // Reduced top padding from 40 to 16
-    paddingBottom: 20, // Reduced bottom padding
+    paddingTop: 8, // Further reduced to minimize space after text
+    paddingBottom: 20,
     paddingHorizontal: 20,
+  },
+  nextPageLogo: {
+    width: 48,
+    height: 48,
+    resizeMode: "contain",
+    marginBottom: 12,
   },
   continueQuestion: {
     fontSize: 18,
