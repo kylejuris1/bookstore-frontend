@@ -295,7 +295,7 @@ export default function NavigationHeader() {
 const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "flex-start", // Changed from space-between to allow flex: 1 spacer to work
     alignItems: "center",
     paddingVertical: 2.25,
     flexWrap: "nowrap",
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
     flexWrap: "nowrap",
-    flex: 1,
+    flexShrink: 0, // Changed from flex: 1 to prevent it from taking space
     justifyContent: "center",
     marginHorizontal: 16,
   },
