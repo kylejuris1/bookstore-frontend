@@ -390,23 +390,23 @@ export default function ReaderScreen() {
             <Pressable
               style={[
                 styles.navButton, 
-                { backgroundColor: theme.card },
+                { backgroundColor: "#FFE4E1" }, // Light pink background
                 !canGoPrev && styles.navButtonDisabled
               ]}
               onPress={handlePreviousChapter}
               disabled={!canGoPrev}
             >
-              <Ionicons name="chevron-back" size={20} color={!canGoPrev ? theme.textSecondary : theme.primary} />
+              <Ionicons name="chevron-back" size={20} color={!canGoPrev ? "#D3D3D3" : "#FFB6C1"} />
               <Text style={[
                 styles.navButtonText, 
-                { color: !canGoPrev ? theme.textSecondary : theme.primary }
+                { color: !canGoPrev ? "#D3D3D3" : "#FFB6C1" } // Lighter pink than Continue Reading button (#FF69B4)
               ]}>Previous Chapter</Text>
             </Pressable>
 
             <Pressable
               style={[
                 styles.navButton, 
-                { backgroundColor: theme.card },
+                { backgroundColor: "#FFE4E1" }, // Light pink background
                 !canGoNext && styles.navButtonDisabled
               ]}
               onPress={handleNextChapter}
@@ -414,9 +414,9 @@ export default function ReaderScreen() {
             >
               <Text style={[
                 styles.navButtonText, 
-                { color: !canGoNext ? theme.textSecondary : "#FFB6C1" } // Lighter pink (#FFB6C1) compared to Continue Reading button (#FF69B4)
+                { color: !canGoNext ? "#D3D3D3" : "#FFB6C1" } // Lighter pink than Continue Reading button (#FF69B4)
               ]}>Next Chapter</Text>
-              <Ionicons name="chevron-forward" size={20} color={!canGoNext ? theme.textSecondary : "#FFB6C1"} />
+              <Ionicons name="chevron-forward" size={20} color={!canGoNext ? "#D3D3D3" : "#FFB6C1"} />
             </Pressable>
           </View>
         )}
