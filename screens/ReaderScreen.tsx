@@ -575,6 +575,8 @@ const styles = StyleSheet.create({
     gap: 16, // Increased from 12 to add more space between buttons
     marginTop: 20,
     paddingBottom: 120, // Doubled from 60 to 120 for more scrolling space
+    position: "relative",
+    zIndex: 10, // Ensure buttons are above the fade overlay (which has zIndex: 1)
   },
   navButton: {
     flex: 1,
@@ -688,6 +690,8 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   continueSection: {
+    position: "relative",
+    zIndex: 10, // Ensure continue section is above the fade overlay (which has zIndex: 1)
     alignItems: "center",
     paddingTop: 0, // Removed padding entirely between text and continue section
     paddingBottom: 20,
