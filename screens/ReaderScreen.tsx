@@ -12,6 +12,14 @@ import PromotionalBanner from "../components/PromotionalBanner"
 const CHAPTER_COST = 50
 const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
 
+// Helper function to convert hex to rgba
+const hexToRgba = (hex: string, alpha: number): string => {
+  const r = parseInt(hex.slice(1, 3), 16)
+  const g = parseInt(hex.slice(3, 5), 16)
+  const b = parseInt(hex.slice(5, 7), 16)
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+}
+
 export default function ReaderScreen() {
   const router = useRouter()
   const { book: bookParam, bookId: bookIdParam, chapter: chapterParam } = useLocalSearchParams()
@@ -310,7 +318,7 @@ export default function ReaderScreen() {
                 styles.textFadeOverlay,
                 {
                   // @ts-ignore - web-specific style
-                  backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 30%, ${theme.background} 70%, ${theme.background} 100%)`,
+                  backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 30%, ${hexToRgba(theme.background, 0.8)} 70%, ${hexToRgba(theme.background, 0.8)} 100%)`,
                 }
               ]} 
               pointerEvents="none" 
@@ -321,7 +329,7 @@ export default function ReaderScreen() {
                 styles.textFadeOverlay,
                 {
                   backgroundColor: theme.background,
-                  opacity: 0.95,
+                  opacity: 0.8, // 80% max opacity
                 }
               ]} 
               pointerEvents="none" 
@@ -512,7 +520,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 200, // Doubled height for more prominent fade effect
+    height: 300, // Increased by 50% from 200 to 300 for more prominent fade
     zIndex: 1, // Ensure overlay is above text
   },
   lockedContainer: {
