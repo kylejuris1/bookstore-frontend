@@ -120,7 +120,7 @@ export default function LibraryScreen() {
             if (progress && lastChapter) {
               router.push({
                 pathname: "/reader",
-                params: { book: JSON.stringify(card), chapter: String(lastChapter) },
+                params: { bookId: card.id, chapter: String(lastChapter) },
               })
             } else {
               router.push({ pathname: "/book/[bookId]", params: { bookId: card.id } })
@@ -242,8 +242,8 @@ export default function LibraryScreen() {
                 router.push({
                   pathname: "/reader",
                   params: {
-                    book: JSON.stringify(toCardData(book)),
-                    ...(lastChapter ? { chapter: String(lastChapter) } : {}),
+                    bookId: book.book_id,
+                    chapter: lastChapter ? String(lastChapter) : "1",
                   },
                 })
               }}

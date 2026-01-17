@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
-import { fetchChapters, fetchChapter, logBookView, type Chapter } from "../lib/api"
+import { fetchChapters, fetchChapter, fetchBook, logBookView, type Chapter, type Book } from "../lib/api"
 import NavigationHeader from "../components/NavigationHeader"
 import PromotionalBanner from "../components/PromotionalBanner"
 
@@ -14,16 +14,29 @@ const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
 
 export default function ReaderScreen() {
   const router = useRouter()
-  const { book: bookParam, chapter: chapterParam } = useLocalSearchParams()
+  const { book: bookParam, bookId: bookIdParam, chapter: chapterParam } = useLocalSearchParams()
   
-  // Memoize the book object to prevent infinite re-renders
-  const book = useMemo(() => {
-    return bookParam ? JSON.parse(bookParam as string) : null
+  // Support both old format (book object) and new format (bookId)
+  const bookIdFromParam = bookIdParam as string | undefined
+  const parsedBook = useMemo(() => {
+    if (bookParam) {
+      try {
+        return JSON.parse(bookParam as string)
+      } catch (e) {
+        return null
+      }
+    }
+    return null
   }, [bookParam])
+  
+  // Use bookId from param if available, otherwise fall back to parsed book
+  const bookIdFromUrl = bookIdFromParam || parsedBook?.id
   
   const { credits, unlockChapter, isChapterUnlocked, getLastReadChapter, updateReadingProgress, settings } = useLibrary()
   const { theme } = useTheme()
-  const bookId = book?.id
+  const [book, setBook] = useState<Book | null>(parsedBook)
+  const [isLoadingBook, setIsLoadingBook] = useState(!parsedBook && !!bookIdFromUrl)
+  const bookId = bookIdFromUrl
   const isWeb = Platform.OS === "web"
   const windowDimensions = useWindowDimensions()
   
@@ -58,6 +71,35 @@ export default function ReaderScreen() {
   const [totalChapters, setTotalChapters] = useState(30)
   const [isLoadingChapter, setIsLoadingChapter] = useState(true)
   const isWebBlocked = isWeb && currentChapter >= 6
+
+  // Load book data if we only have bookId (new format)
+  useEffect(() => {
+    if (!bookIdFromUrl || parsedBook) return // Skip if we already have book data or no bookId
+    
+    let cancelled = false
+    
+    const loadBook = async () => {
+      setIsLoadingBook(true)
+      try {
+        const bookData = await fetchBook(bookIdFromUrl)
+        if (!cancelled && bookData) {
+          setBook(bookData)
+        }
+      } catch (error) {
+        console.error("Error loading book:", error)
+      } finally {
+        if (!cancelled) {
+          setIsLoadingBook(false)
+        }
+      }
+    }
+    
+    loadBook()
+    
+    return () => {
+      cancelled = true
+    }
+  }, [bookIdFromUrl, parsedBook])
 
   // Load chapter data from Supabase - only depend on bookId and currentChapter
   useEffect(() => {
@@ -116,7 +158,19 @@ export default function ReaderScreen() {
     }
   }, [currentChapter, bookId, updateReadingProgress])
 
-  if (!book) {
+  if (isLoadingBook) {
+    return (
+      <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+        <PromotionalBanner />
+        <NavigationHeader />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.primary} />
+        </View>
+      </SafeAreaView>
+    )
+  }
+
+  if (!book || !bookId) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
@@ -293,7 +347,7 @@ export default function ReaderScreen() {
             }}
           >
             <Text style={[styles.headerTitle, { color: theme.text }]} numberOfLines={1}>
-              {book.title}
+              {book.book_name || (book as any).title}
             </Text>
           </Pressable>
           <View style={{ width: 28 }} />

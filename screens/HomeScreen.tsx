@@ -329,7 +329,7 @@ export default function HomeScreen() {
                   if (hasProgress && lastChapter) {
                     router.push({
                       pathname: "/reader",
-                      params: { book: JSON.stringify(bookCardData), chapter: String(lastChapter) },
+                      params: { bookId: bookCardData.id, chapter: String(lastChapter) },
                     })
                   } else {
                     router.push({ pathname: "/book/[bookId]", params: { bookId: item.book_id } })

@@ -114,12 +114,12 @@ export default function BookDetailsScreen() {
       views: (book as any).views,
     }
     const progress = readingProgress[book.book_id]
-    const chapter = progress?.lastChapter ? String(progress.lastChapter) : undefined
+    const chapter = progress?.lastChapter ? String(progress.lastChapter) : "1"
     router.push({
       pathname: "/reader",
       params: {
-        book: JSON.stringify(cardData),
-        ...(chapter ? { chapter } : {}),
+        bookId: cardData.id,
+        chapter,
       },
     })
   }

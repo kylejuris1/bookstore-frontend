@@ -112,7 +112,7 @@ export default function RankScreen() {
                 if (lastChapter) {
                   router.push({
                     pathname: "/reader",
-                    params: { book: JSON.stringify(cardData), chapter: String(lastChapter) },
+                    params: { bookId: cardData.id, chapter: String(lastChapter) },
                   })
                 } else {
                   router.push({ pathname: "/book/[bookId]", params: { bookId: item.book_id } })
