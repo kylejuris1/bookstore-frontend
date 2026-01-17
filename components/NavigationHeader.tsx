@@ -354,6 +354,7 @@ const styles = StyleSheet.create({
     zIndex: 0,
     flexShrink: 0,
     marginLeft: "auto", // Push to the right edge
+    alignSelf: "flex-end", // Ensure it stays on the right
   },
   searchContainer: {
     flexDirection: "row",
@@ -361,9 +362,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    minWidth: 120,
+    minWidth: 100, // Reduced from 120 for mobile
     maxWidth: 200,
-    flex: 0,
+    flexShrink: 1, // Allow to shrink on mobile
     marginHorizontal: 4,
     gap: 6,
   },
