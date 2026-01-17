@@ -304,19 +304,29 @@ export default function ReaderScreen() {
             {chapter.chapter_content}
           </Text>
           {/* Fade gradient overlay */}
-          <View 
-            style={[
-              styles.textFadeOverlay,
-              Platform.OS === "web" ? {
-                // @ts-ignore - web-specific style
-                backgroundImage: `linear-gradient(to bottom, transparent 0%, ${theme.background} 50%, ${theme.background} 100%)`,
-              } : {
-                backgroundColor: theme.background,
-                opacity: 0.98,
-              }
-            ]} 
-            pointerEvents="none" 
-          />
+          {Platform.OS === "web" ? (
+            <View 
+              style={[
+                styles.textFadeOverlay,
+                {
+                  // @ts-ignore - web-specific style
+                  backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 30%, ${theme.background} 70%, ${theme.background} 100%)`,
+                }
+              ]} 
+              pointerEvents="none" 
+            />
+          ) : (
+            <View 
+              style={[
+                styles.textFadeOverlay,
+                {
+                  backgroundColor: theme.background,
+                  opacity: 0.95,
+                }
+              ]} 
+              pointerEvents="none" 
+            />
+          )}
         </View>
       </View>
     )
@@ -502,7 +512,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 60, // Reduced height for fade effect without excessive spacing
+    height: 100, // Increased height for more visible fade
+    zIndex: 1, // Ensure overlay is above text
   },
   lockedContainer: {
     flex: 1,
