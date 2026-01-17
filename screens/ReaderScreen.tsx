@@ -390,23 +390,23 @@ export default function ReaderScreen() {
             <Pressable
               style={[
                 styles.navButton, 
-                { backgroundColor: "#FFE4E1" }, // Light pink background
+                { backgroundColor: "#F5F5F5" }, // Very light gray/off-white background
                 !canGoPrev && styles.navButtonDisabled
               ]}
               onPress={handlePreviousChapter}
               disabled={!canGoPrev}
             >
-              <Ionicons name="chevron-back" size={20} color={!canGoPrev ? "#D3D3D3" : "#FFB6C1"} />
+              <Ionicons name="chevron-back" size={22} color={!canGoPrev ? "#D3D3D3" : "#808080"} />
               <Text style={[
                 styles.navButtonText, 
-                { color: !canGoPrev ? "#D3D3D3" : "#FFB6C1" } // Lighter pink than Continue Reading button (#FF69B4)
+                { color: !canGoPrev ? "#D3D3D3" : "#808080" } // Medium gray for Previous Chapter
               ]}>Previous Chapter</Text>
             </Pressable>
 
             <Pressable
               style={[
                 styles.navButton, 
-                { backgroundColor: "#FFE4E1" }, // Light pink background
+                { backgroundColor: "#F5F5F5" }, // Very light gray/off-white background
                 !canGoNext && styles.navButtonDisabled
               ]}
               onPress={handleNextChapter}
@@ -414,9 +414,9 @@ export default function ReaderScreen() {
             >
               <Text style={[
                 styles.navButtonText, 
-                { color: !canGoNext ? "#D3D3D3" : "#FFB6C1" } // Lighter pink than Continue Reading button (#FF69B4)
+                { color: !canGoNext ? "#D3D3D3" : "#FFB6C1" } // Light pink for Next Chapter
               ]}>Next Chapter</Text>
-              <Ionicons name="chevron-forward" size={20} color={!canGoNext ? "#D3D3D3" : "#FFB6C1"} />
+              <Ionicons name="chevron-forward" size={22} color={!canGoNext ? "#D3D3D3" : "#FFB6C1"} />
             </Pressable>
           </View>
         )}
@@ -502,6 +502,7 @@ const styles = StyleSheet.create({
   },
   chapterTextContainer: {
     position: "relative",
+    overflow: "hidden", // Ensure fade overlay doesn't extend beyond container
   },
   chapterTitle: {
     fontSize: 24,
@@ -521,7 +522,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 300, // Increased by 50% from 200 to 300 for more prominent fade
-    zIndex: 1, // Ensure overlay is above text
+    zIndex: 0, // Lower z-index so it doesn't cover buttons outside container
   },
   lockedContainer: {
     flex: 1,
@@ -576,7 +577,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingBottom: 120, // Doubled from 60 to 120 for more scrolling space
     position: "relative",
-    zIndex: 10, // Ensure buttons are above the fade overlay (which has zIndex: 1)
+    zIndex: 100, // High z-index to ensure buttons are above fade overlay
+    backgroundColor: "transparent", // Ensure background doesn't interfere
   },
   navButton: {
     flex: 1,
@@ -593,8 +595,8 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   navButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
+    fontSize: 15,
+    fontWeight: "700", // Increased from 600 to 700 for sharper, bolder text
     flexShrink: 1, // Allow text to shrink if needed
   },
   modalOverlay: {
