@@ -3,6 +3,7 @@ import { Stack } from "expo-router"
 import { AuthProvider } from "../context/AuthContext"
 import { LibraryProvider } from "../context/LibraryContext"
 import { ThemeProvider } from "../context/ThemeContext"
+import { SearchProvider } from "../context/SearchContext"
 
 export default function RootLayout() {
   useEffect(() => {
@@ -20,9 +21,9 @@ export default function RootLayout() {
   }, [])
 
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <LibraryProvider>
+    <AuthProvider>
+      <LibraryProvider>
+        <SearchProvider>
           <Stack
             screenOptions={{
               headerShown: false,
@@ -31,9 +32,9 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="reader" />
           </Stack>
-        </LibraryProvider>
-      </AuthProvider>
-    </ThemeProvider>
+        </SearchProvider>
+      </LibraryProvider>
+    </AuthProvider>
   )
 }
 
