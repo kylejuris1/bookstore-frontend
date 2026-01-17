@@ -318,7 +318,7 @@ export default function ReaderScreen() {
                 styles.textFadeOverlay,
                 {
                   // @ts-ignore - web-specific style
-                  backgroundImage: `linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 30%, ${hexToRgba(theme.background, 0.8)} 70%, ${hexToRgba(theme.background, 0.8)} 100%)`,
+                  backgroundImage: `linear-gradient(to bottom, ${hexToRgba(theme.background, 0)} 0%, ${hexToRgba(theme.background, 0.2)} 30%, ${hexToRgba(theme.background, 0.5)} 70%, ${hexToRgba(theme.background, 0.6)} 100%)`,
                 }
               ]} 
               pointerEvents="none" 
@@ -329,7 +329,7 @@ export default function ReaderScreen() {
                 styles.textFadeOverlay,
                 {
                   backgroundColor: theme.background,
-                  opacity: 0.8, // 80% max opacity
+                  opacity: 0.6, // 60% opacity overlay = 40% visible text
                 }
               ]} 
               pointerEvents="none" 
