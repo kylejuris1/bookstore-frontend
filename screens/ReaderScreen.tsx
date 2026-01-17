@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 100, // Increased height for more visible fade
+    height: 200, // Doubled height for more prominent fade effect
     zIndex: 1, // Ensure overlay is above text
   },
   lockedContainer: {
