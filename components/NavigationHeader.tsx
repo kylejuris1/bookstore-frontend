@@ -353,6 +353,7 @@ const styles = StyleSheet.create({
     gap: 8,
     zIndex: 0,
     flexShrink: 0,
+    marginLeft: "auto", // Push to the right edge
   },
   searchContainer: {
     flexDirection: "row",
@@ -375,7 +376,7 @@ const styles = StyleSheet.create({
   },
   hamburgerButton: {
     padding: 4,
-    marginLeft: 4,
+    marginLeft: 0, // As left as possible
   },
   sidePanelOverlay: {
     position: "absolute",
@@ -479,6 +480,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
+    marginRight: 0, // As right as possible
   },
   credits: {
     fontSize: 16,

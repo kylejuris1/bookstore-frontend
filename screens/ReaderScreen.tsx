@@ -414,9 +414,9 @@ export default function ReaderScreen() {
             >
               <Text style={[
                 styles.navButtonText, 
-                { color: !canGoNext ? "#D3D3D3" : "#FFB6C1" } // Light pink for Next Chapter
+                { color: !canGoNext ? "#D3D3D3" : "#FF69B4" } // Hot pink to match Continue Reading button
               ]}>Next Chapter</Text>
-              <Ionicons name="chevron-forward" size={22} color={!canGoNext ? "#D3D3D3" : "#FFB6C1"} />
+              <Ionicons name="chevron-forward" size={22} color={!canGoNext ? "#D3D3D3" : "#FF69B4"} />
             </Pressable>
           </View>
         )}
