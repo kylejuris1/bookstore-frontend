@@ -24,6 +24,7 @@ import { useTheme } from "../context/ThemeContext"
 import BookCard, { formatViews } from "../components/BookCard"
 import { fetchBooks, type Book } from "../lib/api"
 import Footer from "../components/Footer"
+import PromotionalBanner from "../components/PromotionalBanner"
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300&h=450"
 const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
