@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     gap: 16, // Increased from 12 to add more space between buttons
     marginTop: 20,
-    paddingBottom: 60, // Added space after buttons for scrolling
+    paddingBottom: 120, // Doubled from 60 to 120 for more scrolling space
   },
   navButton: {
     flex: 1,
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
   },
   continueSection: {
     alignItems: "center",
-    paddingTop: 8, // Further reduced to minimize space after text
+    paddingTop: 0, // Removed padding entirely between text and continue section
     paddingBottom: 20,
     paddingHorizontal: 20,
   },

@@ -69,9 +69,9 @@ export default function NavigationHeader() {
     Animated.timing(slideAnim, {
       toValue: showSidePanel ? 0 : -280,
       duration: 300,
-      useNativeDriver: true,
+      useNativeDriver: !isWeb, // Disable native driver on web
     }).start()
-  }, [showSidePanel, slideAnim])
+  }, [showSidePanel, slideAnim, isWeb])
   
   // Calculate responsive padding with smooth transitions
   const horizontalPadding = React.useMemo(() => {

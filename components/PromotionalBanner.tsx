@@ -13,18 +13,18 @@ export default function PromotionalBanner() {
         Animated.timing(shineAnim, {
           toValue: 1,
           duration: 2000,
-          useNativeDriver: true,
+          useNativeDriver: !isWeb, // Disable native driver on web
         }),
         Animated.timing(shineAnim, {
           toValue: -1,
           duration: 0,
-          useNativeDriver: true,
+          useNativeDriver: !isWeb, // Disable native driver on web
         }),
       ])
     )
     shineAnimation.start()
     return () => shineAnimation.stop()
-  }, [shineAnim])
+  }, [shineAnim, isWeb])
 
   const handleDownload = () => {
     if (isWeb) {
