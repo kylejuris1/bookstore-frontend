@@ -6,6 +6,7 @@ import { useRouter, useLocalSearchParams } from "expo-router"
 import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
 import { fetchChapters, fetchChapter, fetchBook, logBookView, type Chapter, type Book } from "../lib/api"
+import { MetaPixelEvent } from "../lib/MetaPixelEvent"
 import NavigationHeader from "../components/NavigationHeader"
 import PromotionalBanner from "../components/PromotionalBanner"
 
@@ -228,6 +229,12 @@ export default function ReaderScreen() {
     })
   }
 
+  const handleContinueReadingClick = () => {
+    // Fire-and-forget; don't block navigation if Pixel is slow/blocked.
+    void MetaPixelEvent.track("ClickButtonContinueReading")
+    handleContinueOnApp()
+  }
+
   const handleUnlockChapter = async () => {
     if (!pendingChapter || !bookId) return
 
@@ -377,7 +384,7 @@ export default function ReaderScreen() {
               <Text style={[styles.continueQuestion, { color: theme.text }]}>Want to know what happens next?</Text>
               <Pressable 
                 style={styles.continueButton}
-                onPress={handleContinueOnApp}
+                onPress={handleContinueReadingClick}
               >
                 <Text style={styles.continueButtonText}>Continue Reading</Text>
               </Pressable>
@@ -397,10 +404,14 @@ export default function ReaderScreen() {
               disabled={!canGoPrev}
             >
               <Ionicons name="chevron-back" size={22} color={!canGoPrev ? "#D3D3D3" : "#808080"} />
-              <Text style={[
-                styles.navButtonText, 
-                { color: !canGoPrev ? "#D3D3D3" : "#808080" } // Medium gray for Previous Chapter
-              ]}>Previous Chapter</Text>
+              <Text 
+                style={[
+                  styles.navButtonText, 
+                  { color: !canGoPrev ? "#D3D3D3" : "#808080" } // Medium gray for Previous Chapter
+                ]}
+                numberOfLines={2}
+                adjustsFontSizeToFit={false}
+              >Previous Chapter</Text>
             </Pressable>
 
             <Pressable
@@ -412,10 +423,14 @@ export default function ReaderScreen() {
               onPress={handleNextChapter}
               disabled={!canGoNext}
             >
-              <Text style={[
-                styles.navButtonText, 
-                { color: !canGoNext ? "#D3D3D3" : "#FF69B4" } // Hot pink to match Continue Reading button
-              ]}>Next Chapter</Text>
+              <Text 
+                style={[
+                  styles.navButtonText, 
+                  { color: !canGoNext ? "#D3D3D3" : "#FF69B4" } // Hot pink to match Continue Reading button
+                ]}
+                numberOfLines={2}
+                adjustsFontSizeToFit={false}
+              >Next Chapter</Text>
               <Ionicons name="chevron-forward" size={22} color={!canGoNext ? "#D3D3D3" : "#FF69B4"} />
             </Pressable>
           </View>
@@ -426,7 +441,7 @@ export default function ReaderScreen() {
       <View style={styles.floatingDownloadButtonContainer}>
         <Pressable 
           style={styles.floatingDownloadButton}
-          onPress={handleContinueOnApp}
+          onPress={handleContinueReadingClick}
         >
           <Text style={styles.floatingDownloadButtonText}>Download the Book</Text>
         </Pressable>
@@ -590,14 +605,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 6,
     minWidth: 0, // Allow button to shrink
+    overflow: "hidden", // Prevent text from spilling out
   },
   navButtonDisabled: {
     opacity: 0.5,
   },
   navButtonText: {
-    fontSize: 15,
+    fontSize: 14, // Reduced from 15 to prevent overflow
     fontWeight: "700", // Increased from 600 to 700 for sharper, bolder text
     flexShrink: 1, // Allow text to shrink if needed
+    textAlign: "center", // Center the text
   },
   modalOverlay: {
     flex: 1,

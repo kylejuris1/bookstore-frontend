@@ -177,12 +177,12 @@ export default function HomeScreen() {
       })
     })
 
-    const topTags = [...tagCounts.entries()]
+    // Get all tags, sorted by count (most popular first)
+    const allTags = [...tagCounts.entries()]
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
       .map(([tag]) => tag)
 
-    return topTags
+    return allTags
       .map((tag) => {
         const candidates = books
           .filter((b) => (b.tags || []).includes(tag))
@@ -200,6 +200,14 @@ export default function HomeScreen() {
   }, [books])
 
   const [slideIndex, setSlideIndex] = useState(0)
+
+  const goToPreviousSlide = () => {
+    setSlideIndex((prev) => (prev - 1 + topSlides.length) % topSlides.length)
+  }
+
+  const goToNextSlide = () => {
+    setSlideIndex((prev) => (prev + 1) % topSlides.length)
+  }
 
   useEffect(() => {
     if (!topSlides.length) return
@@ -257,30 +265,44 @@ export default function HomeScreen() {
       <ScrollView showsVerticalScrollIndicator={false} style={[styles.content, { paddingHorizontal: horizontalPadding }]}>
         {topSlides.length > 0 && (
           <View style={[styles.heroShell, { borderColor: theme.border, marginHorizontal: -horizontalPadding }]}>
-            <Pressable
-              style={styles.heroPressable}
-              onPress={() =>
-                router.push({ pathname: "/book/[bookId]", params: { bookId: topSlides[slideIndex].book.book_id } })
-              }
-            >
-              <ImageBackground
-                source={{ uri: topSlides[slideIndex].cover }}
-                style={styles.heroImage}
-                imageStyle={styles.heroImageRadius}
-                resizeMode="cover"
+            <View style={styles.heroContainer}>
+              <View style={styles.heroOverlay} />
+              <Pressable
+                style={styles.heroPressable}
+                onPress={() =>
+                  router.push({ pathname: "/book/[bookId]", params: { bookId: topSlides[slideIndex].book.book_id } })
+                }
               >
-                <View style={styles.heroOverlay} />
-                <View style={styles.heroContent}>
-                  <Text style={[styles.heroTag, { color: theme.primary }]}>Top in {topSlides[slideIndex].tag}</Text>
-                  <Text style={styles.heroTitle} numberOfLines={1}>
-                    {topSlides[slideIndex].book.book_name}
-                  </Text>
-                  <Text style={styles.heroAuthor} numberOfLines={1}>
-                    by {topSlides[slideIndex].book.author}
-                  </Text>
-                </View>
-              </ImageBackground>
-            </Pressable>
+                <ImageBackground
+                  source={{ uri: topSlides[slideIndex].cover }}
+                  style={styles.heroImage}
+                  imageStyle={styles.heroImageRadius}
+                  resizeMode="contain"
+                >
+                  <View style={styles.heroContent}>
+                    <Text style={[styles.heroTag, { color: theme.primary }]}>Top in {topSlides[slideIndex].tag}</Text>
+                    <Text style={styles.heroTitle} numberOfLines={1}>
+                      {topSlides[slideIndex].book.book_name}
+                    </Text>
+                    <Text style={styles.heroAuthor} numberOfLines={1}>
+                      by {topSlides[slideIndex].book.author}
+                    </Text>
+                  </View>
+                </ImageBackground>
+              </Pressable>
+              {/* Left Arrow */}
+              {topSlides.length > 1 && (
+                <Pressable style={styles.heroArrowLeft} onPress={goToPreviousSlide}>
+                  <Ionicons name="chevron-back" size={24} color="#fff" />
+                </Pressable>
+              )}
+              {/* Right Arrow */}
+              {topSlides.length > 1 && (
+                <Pressable style={styles.heroArrowRight} onPress={goToNextSlide}>
+                  <Ionicons name="chevron-forward" size={24} color="#fff" />
+                </Pressable>
+              )}
+            </View>
             <View style={styles.heroDots}>
               {topSlides.map((_, idx) => (
                 <Pressable
@@ -611,21 +633,56 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     overflow: "hidden",
   },
+  heroContainer: {
+    position: "relative",
+  },
+  heroOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    borderRadius: 14,
+    zIndex: 1,
+  },
   heroPressable: {
     borderRadius: 14,
     overflow: "hidden",
+    zIndex: 2,
+    position: "relative",
   },
   heroImage: {
-    height: 280,
     width: "100%",
+    minHeight: 280,
+    maxHeight: 500,
+    aspectRatio: 16 / 9, // Default aspect ratio, will be overridden by image's natural aspect ratio
     justifyContent: "flex-end",
   },
   heroImageRadius: {
     borderRadius: 14,
   },
-  heroOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.45)",
+  heroArrowLeft: {
+    position: "absolute",
+    left: 12,
+    top: "50%",
+    marginTop: -20, // Half of height (40/2)
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  heroArrowRight: {
+    position: "absolute",
+    right: 12,
+    top: "50%",
+    marginTop: -20, // Half of height (40/2)
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
   heroContent: {
     padding: 16,

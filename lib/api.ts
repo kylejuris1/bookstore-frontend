@@ -18,6 +18,7 @@ export interface Book {
   views?: number;
   summary?: string | null;
   cover?: string | null;
+  ad_image?: string | null;
 }
 
 export interface Chapter {

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from "react"
 import { View, Text, StyleSheet, Pressable, Image, Animated, Linking, Platform } from "react-native"
+import { MetaPixelEvent } from "../lib/MetaPixelEvent"
 
 const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
 
@@ -27,6 +28,8 @@ export default function PromotionalBanner() {
   }, [shineAnim, isWeb])
 
   const handleDownload = () => {
+    // Fire Meta Pixel event
+    void MetaPixelEvent.track("ClickButtonContinueReading")
     if (isWeb) {
       Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})
     }
