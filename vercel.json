@@ -1,8 +1,0 @@
-{
-  "buildCommand": "git submodule update --init --recursive && cd frontend && npm install && npm run web:export",
-  "outputDirectory": "frontend/dist",
-  "installCommand": "git submodule update --init --recursive && cd frontend && npm install",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}
