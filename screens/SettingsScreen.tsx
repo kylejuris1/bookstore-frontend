@@ -5,14 +5,14 @@ import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
 import { useState, useEffect, useMemo } from "react"
 import { useRouter } from "expo-router"
-import { fetchBook, deleteAccount } from "../lib/api"
+import { fetchBook, requestAccountDeletionOtp, confirmAccountDeletion } from "../lib/api"
 import NavigationHeader from "../components/NavigationHeader"
 import PromotionalBanner from "../components/PromotionalBanner"
 
 const APP_DOWNLOAD_URL = "https://apps.apple.com/app/id6756338644"
 
 export default function SettingsScreen() {
-  const { user, session, sendOTP, verifyOTP, signOut, loading } = useAuth()
+  const { user, sendOTP, verifyOTP, signOut, loading } = useAuth()
   const { settings, updateSettings, paidChapters } = useLibrary()
   const { theme, isDarkMode, toggleTheme } = useTheme()
   const router = useRouter()
@@ -30,6 +30,7 @@ export default function SettingsScreen() {
   const [bookNames, setBookNames] = useState<Record<string, string>>({})
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteOtpSent, setDeleteOtpSent] = useState(false)
+  const [deleteEmail, setDeleteEmail] = useState("")
   const [deleteOtp, setDeleteOtp] = useState("")
   const [deleteLoading, setDeleteLoading] = useState(false)
   const isWeb = Platform.OS === "web"
@@ -108,10 +109,13 @@ export default function SettingsScreen() {
     setOtpSent(false)
   }
 
-  const handleRequestDeleteOTP = async () => {
-    if (!user?.email) return
+  const handleSendDeletionCode = async () => {
+    if (!deleteEmail) {
+      Alert.alert("Error", "Please enter your email.")
+      return
+    }
     setDeleteLoading(true)
-    const { error } = await sendOTP(user.email)
+    const { error } = await requestAccountDeletionOtp(deleteEmail)
     setDeleteLoading(false)
     if (error) {
       Alert.alert("Error", error)
@@ -121,35 +125,34 @@ export default function SettingsScreen() {
     }
   }
 
-  const handleVerifyAndDelete = async () => {
-    if (!user?.email || !session?.access_token) return
+  const handleConfirmDeletion = async () => {
+    if (!deleteEmail) {
+      Alert.alert("Error", "Please enter your email.")
+      return
+    }
     if (!deleteOtp || deleteOtp.length !== 6) {
       Alert.alert("Error", "Please enter the 6-digit code from your email.")
       return
     }
     setDeleteLoading(true)
-    const { error: verifyError } = await verifyOTP(user.email, deleteOtp)
-    if (verifyError) {
-      setDeleteLoading(false)
-      Alert.alert("Error", verifyError)
-      return
-    }
-    const { error: deleteError } = await deleteAccount(session.access_token)
+    const { error } = await confirmAccountDeletion(deleteEmail, deleteOtp)
     setDeleteLoading(false)
-    if (deleteError) {
-      Alert.alert("Error", deleteError)
+    if (error) {
+      Alert.alert("Error", error)
       return
     }
+
     setShowDeleteModal(false)
     setDeleteOtpSent(false)
+    setDeleteEmail("")
     setDeleteOtp("")
-    await signOut()
     Alert.alert("Account deleted", "Your data has been permanently deleted.")
   }
 
   const handleCloseDeleteModal = () => {
     setShowDeleteModal(false)
     setDeleteOtpSent(false)
+    setDeleteEmail("")
     setDeleteOtp("")
   }
 
@@ -274,26 +277,23 @@ export default function SettingsScreen() {
         </View>
 
         {user && (
+        <Pressable style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Sign Out</Text>
+        </Pressable>
+        )}
+
+        {/* Delete account (email + OTP) */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: theme.primary }]}>Data & Privacy</Text>
-          <Text style={[styles.deleteSectionHint, { color: theme.textSecondary }]}>
-            Permanently delete your account and all associated data. You will receive a verification code by email.
-          </Text>
           <Pressable
             style={[styles.deleteDataButton, { borderColor: theme.destructive || "#dc2626" }]}
             onPress={() => setShowDeleteModal(true)}
           >
             <Ionicons name="trash-outline" size={22} color={theme.destructive || "#dc2626"} />
-            <Text style={[styles.deleteDataButtonText, { color: theme.destructive || "#dc2626" }]}>Delete my data</Text>
+            <Text style={[styles.deleteDataButtonText, { color: theme.destructive || "#dc2626" }]}>
+              Delete my account
+            </Text>
           </Pressable>
         </View>
-        )}
-
-        {user && (
-        <Pressable style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Sign Out</Text>
-        </Pressable>
-        )}
       </ScrollView>
 
       {/* Login Modal */}
@@ -406,35 +406,31 @@ export default function SettingsScreen() {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
             <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
-              <Text style={[styles.modalTitle, { color: theme.primary }]}>Delete my data</Text>
+              <Text style={[styles.modalTitle, { color: theme.primary }]}>Delete my account</Text>
               <Pressable onPress={handleCloseDeleteModal}>
                 <Ionicons name="close" size={24} color={theme.textSecondary} />
               </Pressable>
             </View>
             <View style={styles.modalBody}>
-              {isWeb ? (
-                <View style={styles.webOnlyBlock}>
-                  <Ionicons name="trash-outline" size={48} color={theme.primary} />
-                  <Text style={[styles.loginHint, { color: theme.textSecondary, textAlign: "center" }]}>
-                    Account deletion is available in the mobile app. Open the app to delete your data.
-                  </Text>
-                  <Pressable
-                    style={[styles.sendOTPButton, { backgroundColor: theme.primary }]}
-                    onPress={() => Linking.openURL(APP_DOWNLOAD_URL).catch(() => {})}
-                  >
-                    <Text style={[styles.sendOTPButtonText, { color: theme.primaryForeground || "#fff" }]}>
-                      Open the App
-                    </Text>
-                  </Pressable>
-                </View>
-              ) : !deleteOtpSent ? (
+              {!deleteOtpSent ? (
                 <>
                   <Text style={[styles.loginHint, { color: theme.textSecondary }]}>
-                    We'll send a 6-digit verification code to {user?.email}. After you enter it, your account and all data will be permanently deleted. This cannot be undone.
+                    Enter your email to receive a 6-digit verification code. After you enter the code, your account and all associated data will be permanently deleted. This cannot be undone.
                   </Text>
+                  <TextInput
+                    style={[styles.emailInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
+                    placeholder="Enter your email"
+                    placeholderTextColor={theme.textSecondary}
+                    value={deleteEmail}
+                    onChangeText={setDeleteEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    autoFocus
+                    editable={!deleteLoading}
+                  />
                   <Pressable
                     style={[styles.sendOTPButton, { backgroundColor: theme.destructive || "#dc2626" }, deleteLoading && styles.sendOTPButtonDisabled]}
-                    onPress={handleRequestDeleteOTP}
+                    onPress={handleSendDeletionCode}
                     disabled={deleteLoading}
                   >
                     <Text style={[styles.sendOTPButtonText, { color: "#fff" }]}>
@@ -445,7 +441,7 @@ export default function SettingsScreen() {
               ) : (
                 <>
                   <Text style={[styles.otpSentText, { color: theme.text }]}>
-                    Enter the 6-digit code sent to {user?.email}
+                    Enter the 6-digit code sent to {deleteEmail}
                   </Text>
                   <TextInput
                     style={[styles.otpInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
@@ -460,11 +456,11 @@ export default function SettingsScreen() {
                   />
                   <Pressable
                     style={[styles.verifyOTPButton, { backgroundColor: theme.destructive || "#dc2626" }, (deleteLoading || deleteOtp.length !== 6) && styles.verifyOTPButtonDisabled]}
-                    onPress={handleVerifyAndDelete}
+                    onPress={handleConfirmDeletion}
                     disabled={deleteLoading || deleteOtp.length !== 6}
                   >
                     <Text style={[styles.verifyOTPButtonText, { color: "#fff" }]}>
-                      {deleteLoading ? "Deleting..." : "Verify and delete my data"}
+                      {deleteLoading ? "Deleting..." : "Verify and delete my account"}
                     </Text>
                   </Pressable>
                   <Pressable

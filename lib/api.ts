@@ -185,3 +185,49 @@ export async function deleteAccount(accessToken: string): Promise<{ error?: stri
   }
 }
 
+// Request an OTP for account deletion (email -> OTP)
+export async function requestAccountDeletionOtp(email: string): Promise<{ error?: string }> {
+  try {
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || API_BASE_URL
+    if (!apiUrl) return { error: 'API URL not configured' }
+
+    const resp = await fetch(`${apiUrl}/auth/delete-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '')
+      return { error: text || `Request failed: ${resp.status}` }
+    }
+
+    return {}
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to request deletion code' }
+  }
+}
+
+// Confirm OTP and delete account + data
+export async function confirmAccountDeletion(email: string, token: string): Promise<{ error?: string }> {
+  try {
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || API_BASE_URL
+    if (!apiUrl) return { error: 'API URL not configured' }
+
+    const resp = await fetch(`${apiUrl}/auth/delete-confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, token }),
+    })
+
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '')
+      return { error: text || `Request failed: ${resp.status}` }
+    }
+
+    return {}
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete account' }
+  }
+}
+
