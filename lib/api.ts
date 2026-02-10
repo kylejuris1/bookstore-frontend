@@ -161,3 +161,27 @@ export async function createGuestUser(existingId?: string): Promise<string> {
   return json.guestId || guestId
 }
 
+// Delete account and all user data (requires valid session token). Used after OTP verification.
+export async function deleteAccount(accessToken: string): Promise<{ error?: string }> {
+  try {
+    const apiUrl = process.env.EXPO_PUBLIC_API_URL || API_BASE_URL
+    if (!apiUrl) {
+      return { error: 'API URL not configured' }
+    }
+    const resp = await fetch(`${apiUrl}/auth/delete`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '')
+      return { error: text || `Request failed: ${resp.status}` }
+    }
+    return {}
+  } catch (err: any) {
+    return { error: err?.message || 'Failed to delete account' }
+  }
+}
+
