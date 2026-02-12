@@ -3,9 +3,9 @@ import { Ionicons } from "@expo/vector-icons"
 import { useAuth } from "../context/AuthContext"
 import { useLibrary } from "../context/LibraryContext"
 import { useTheme } from "../context/ThemeContext"
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, type ComponentProps } from "react"
 import { useRouter } from "expo-router"
-import { fetchBook, requestAccountDeletionOtp, confirmAccountDeletion } from "../lib/api"
+import { fetchBook } from "../lib/api"
 import NavigationHeader from "../components/NavigationHeader"
 import PromotionalBanner from "../components/PromotionalBanner"
 
@@ -28,11 +28,6 @@ export default function SettingsScreen() {
   const [showHelpModal, setShowHelpModal] = useState(false)
   const [showAboutModal, setShowAboutModal] = useState(false)
   const [bookNames, setBookNames] = useState<Record<string, string>>({})
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [deleteOtpSent, setDeleteOtpSent] = useState(false)
-  const [deleteEmail, setDeleteEmail] = useState("")
-  const [deleteOtp, setDeleteOtp] = useState("")
-  const [deleteLoading, setDeleteLoading] = useState(false)
   const isWeb = Platform.OS === "web"
   
   const horizontalPadding = useMemo(() => {
@@ -107,53 +102,6 @@ export default function SettingsScreen() {
     setEmail("")
     setOtp("")
     setOtpSent(false)
-  }
-
-  const handleSendDeletionCode = async () => {
-    if (!deleteEmail) {
-      Alert.alert("Error", "Please enter your email.")
-      return
-    }
-    setDeleteLoading(true)
-    const { error } = await requestAccountDeletionOtp(deleteEmail)
-    setDeleteLoading(false)
-    if (error) {
-      Alert.alert("Error", error)
-    } else {
-      setDeleteOtpSent(true)
-      Alert.alert("Code sent", "Check your email for the 6-digit code.")
-    }
-  }
-
-  const handleConfirmDeletion = async () => {
-    if (!deleteEmail) {
-      Alert.alert("Error", "Please enter your email.")
-      return
-    }
-    if (!deleteOtp || deleteOtp.length !== 6) {
-      Alert.alert("Error", "Please enter the 6-digit code from your email.")
-      return
-    }
-    setDeleteLoading(true)
-    const { error } = await confirmAccountDeletion(deleteEmail, deleteOtp)
-    setDeleteLoading(false)
-    if (error) {
-      Alert.alert("Error", error)
-      return
-    }
-
-    setShowDeleteModal(false)
-    setDeleteOtpSent(false)
-    setDeleteEmail("")
-    setDeleteOtp("")
-    Alert.alert("Account deleted", "Your data has been permanently deleted.")
-  }
-
-  const handleCloseDeleteModal = () => {
-    setShowDeleteModal(false)
-    setDeleteOtpSent(false)
-    setDeleteEmail("")
-    setDeleteOtp("")
   }
 
   const handleLogout = async () => {
@@ -274,6 +222,7 @@ export default function SettingsScreen() {
           <SettingItem icon="help-circle" label="Help & FAQ" onPress={handleHelp} theme={theme} />
           <SettingItem icon="lock-closed" label="Privacy Policy" onPress={handlePrivacy} theme={theme} />
           <SettingItem icon="information-circle" label="About" onPress={handleAbout} theme={theme} />
+          <SettingItem icon="trash-outline" label="Delete Account" onPress={() => router.push("/delete-account")} theme={theme} />
         </View>
 
         {user && (
@@ -282,18 +231,6 @@ export default function SettingsScreen() {
         </Pressable>
         )}
 
-        {/* Delete account (email + OTP) */}
-        <View style={styles.section}>
-          <Pressable
-            style={[styles.deleteDataButton, { borderColor: theme.destructive || "#dc2626" }]}
-            onPress={() => setShowDeleteModal(true)}
-          >
-            <Ionicons name="trash-outline" size={22} color={theme.destructive || "#dc2626"} />
-            <Text style={[styles.deleteDataButtonText, { color: theme.destructive || "#dc2626" }]}>
-              Delete my account
-            </Text>
-          </Pressable>
-        </View>
       </ScrollView>
 
       {/* Login Modal */}
@@ -388,90 +325,6 @@ export default function SettingsScreen() {
                     disabled={isLoading}
                   >
                     <Text style={[styles.resendButtonText, { color: theme.primary }]}>Change email</Text>
-                  </Pressable>
-                </>
-              )}
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Delete my data Modal */}
-      <Modal
-        visible={showDeleteModal}
-        transparent
-        animationType="fade"
-        onRequestClose={handleCloseDeleteModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.card }]}>
-            <View style={[styles.modalHeader, { borderBottomColor: theme.border }]}>
-              <Text style={[styles.modalTitle, { color: theme.primary }]}>Delete my account</Text>
-              <Pressable onPress={handleCloseDeleteModal}>
-                <Ionicons name="close" size={24} color={theme.textSecondary} />
-              </Pressable>
-            </View>
-            <View style={styles.modalBody}>
-              {!deleteOtpSent ? (
-                <>
-                  <Text style={[styles.loginHint, { color: theme.textSecondary }]}>
-                    Enter your email to receive a 6-digit verification code. After you enter the code, your account and all associated data will be permanently deleted. This cannot be undone.
-                  </Text>
-                  <TextInput
-                    style={[styles.emailInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                    placeholder="Enter your email"
-                    placeholderTextColor={theme.textSecondary}
-                    value={deleteEmail}
-                    onChangeText={setDeleteEmail}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoFocus
-                    editable={!deleteLoading}
-                  />
-                  <Pressable
-                    style={[styles.sendOTPButton, { backgroundColor: theme.destructive || "#dc2626" }, deleteLoading && styles.sendOTPButtonDisabled]}
-                    onPress={handleSendDeletionCode}
-                    disabled={deleteLoading}
-                  >
-                    <Text style={[styles.sendOTPButtonText, { color: "#fff" }]}>
-                      {deleteLoading ? "Sending..." : "Send verification code"}
-                    </Text>
-                  </Pressable>
-                </>
-              ) : (
-                <>
-                  <Text style={[styles.otpSentText, { color: theme.text }]}>
-                    Enter the 6-digit code sent to {deleteEmail}
-                  </Text>
-                  <TextInput
-                    style={[styles.otpInput, { backgroundColor: theme.background, color: theme.text, borderColor: theme.border }]}
-                    placeholder="000000"
-                    placeholderTextColor={theme.textSecondary}
-                    value={deleteOtp}
-                    onChangeText={(text) => setDeleteOtp(text.replace(/[^0-9]/g, '').slice(0, 6))}
-                    keyboardType="number-pad"
-                    maxLength={6}
-                    autoFocus
-                    editable={!deleteLoading}
-                  />
-                  <Pressable
-                    style={[styles.verifyOTPButton, { backgroundColor: theme.destructive || "#dc2626" }, (deleteLoading || deleteOtp.length !== 6) && styles.verifyOTPButtonDisabled]}
-                    onPress={handleConfirmDeletion}
-                    disabled={deleteLoading || deleteOtp.length !== 6}
-                  >
-                    <Text style={[styles.verifyOTPButtonText, { color: "#fff" }]}>
-                      {deleteLoading ? "Deleting..." : "Verify and delete my account"}
-                    </Text>
-                  </Pressable>
-                  <Pressable
-                    style={styles.resendButton}
-                    onPress={() => {
-                      setDeleteOtpSent(false)
-                      setDeleteOtp("")
-                    }}
-                    disabled={deleteLoading}
-                  >
-                    <Text style={[styles.resendButtonText, { color: theme.primary }]}>Use a different email</Text>
                   </Pressable>
                 </>
               )}
@@ -647,7 +500,19 @@ export default function SettingsScreen() {
   )
 }
 
-function SettingItem({ icon, label, onPress, value, theme }: { icon: string; label: string; onPress: () => void; value?: string; theme: any }) {
+function SettingItem({
+  icon,
+  label,
+  onPress,
+  value,
+  theme,
+}: {
+  icon: ComponentProps<typeof Ionicons>["name"]
+  label: string
+  onPress: () => void
+  value?: string
+  theme: any
+}) {
   return (
     <Pressable style={[styles.settingItem, { borderBottomColor: theme.border }]} onPress={onPress}>
       <View style={styles.settingLeft}>
@@ -684,25 +549,6 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#d4876f",
     marginBottom: 12,
-  },
-  deleteSectionHint: {
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  deleteDataButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-    borderWidth: 1.5,
-  },
-  deleteDataButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
   },
   settingItem: {
     flexDirection: "row",

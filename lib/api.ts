@@ -230,4 +230,3 @@ export async function confirmAccountDeletion(email: string, token: string): Prom
     return { error: err?.message || 'Failed to delete account' }
   }
 }
-
